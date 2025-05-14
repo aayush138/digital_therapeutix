@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.routes.forms import SignupForm, ForgotPasswordForm, ResetPasswordForm, LoginForm
 from app.models.user import User, db
 from app.utils.helpers import generate_verification_token, generate_reset_token, verify_reset_token, generate_access_token
@@ -75,7 +75,7 @@ def login():
 
 
 # For the logout route
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     flash("You have been logged out.", "info")
