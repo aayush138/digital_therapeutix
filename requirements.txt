@@ -1,1 +1,8 @@
- 
+Flask
+Flask-WTF
+Flask-SQLAlchemy
+Flask-Mail
+Flask-Session
+python-dotenv
+Werkzeug
+WTForms
