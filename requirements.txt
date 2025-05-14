@@ -6,3 +6,5 @@ Flask-Session
 python-dotenv
 Werkzeug
 WTForms
+PyJWT
+email_validator

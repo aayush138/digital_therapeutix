@@ -1,2 +1,6 @@
 .env
 venvn
+__pycache__
+*.pyc
+instance
+flask_session
