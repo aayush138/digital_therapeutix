@@ -19,7 +19,7 @@ class User(db.Model):
     is_email_verified = db.Column(db.Boolean, default=False)
     is_license_verified = db.Column(db.Boolean, default=False)  # Manual approval for now
 
-    registered_at = db.Column(db.DateTime, default=datetime.now())
+    registered_at = db.Column(db.DateTime, default=datetime.now)
     last_verification_reminder = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password: str):
