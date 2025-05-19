@@ -7,6 +7,12 @@ from app.utils.email import send_verification_email, send_password_reset_email
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+
+@auth_bp.route('/')
+def root():
+    return redirect(url_for('auth.login'))
+
+
 # For the signup route
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -45,8 +51,14 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
 
+        remember_me = form.remember.data
+
         if not user:
             flash("No account found with this email.", "danger")
+            return render_template("auth/login.html", form=form)
+        
+        if not user.check_password(form.password.data):
+            flash("Incorrect password", "danger")
             return render_template("auth/login.html", form=form)
 
         if not user.is_email_verified:
@@ -56,10 +68,9 @@ def login():
         if not user.is_license_verified:
             flash("Your license is under review. Please wait for admin approval.", "warning")
             return render_template("auth/login.html", form=form)
-
-        if not user.check_password(form.password.data):
-            flash("Incorrect password", "danger")
-            return render_template("auth/login.html", form=form)
+        
+         # Set session permanence based on remember_me
+        session.permanent = remember_me
 
         # All good – set JWT + session
         token = generate_access_token(user.id)

@@ -1,0 +1,18 @@
+/* Global font setup */
+body, p, li, a, span, div, button {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Headings (h1 to h6) use Manrope */
+h1, h2, h3, h4, h5, h6,
+.heading, .font-heading {
+  font-family: 'Manrope', sans-serif;
+}
+
+.font-body {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-heading {
+  font-family: 'Manrope', sans-serif;
+}

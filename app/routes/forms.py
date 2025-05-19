@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 
@@ -11,7 +11,7 @@ class SignupForm(FlaskForm):
     license_country = StringField("Issuing Country", validators=[DataRequired()])
     institution = StringField("Institution (Optional)")
     
-    password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
+    password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField("Confirm Password", validators=[
         DataRequired(), EqualTo("password", message="Passwords must match")
     ])
@@ -24,6 +24,7 @@ class SignupForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
+    remember = BooleanField("Remember Me")
     submit = SubmitField("Log In")    
 
 

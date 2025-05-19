@@ -1,0 +1,8 @@
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.flash-message').forEach(el => {
+      el.classList.add('opacity-0', 'transition-opacity', 'duration-1500');
+      setTimeout(() => el.remove(), 500);
+    });
+  }, 3000);
+</script>

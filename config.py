@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -9,6 +10,7 @@ class Config:
 
     SESSION_TYPE = 'filesystem'
     SESSION_PERMANENT = False
+    PERMANENT_SESSION_LIFETIME = timedelta(days=10)
 
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
