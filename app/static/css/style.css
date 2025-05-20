@@ -1,3 +1,14 @@
+:root{
+  --primary-color: #15803d;
+  --secondary-color: #f3f4f6;
+  --text-color: #111827;
+  --background-color: #ffffff;
+  --border-color: #e5e7eb;
+  --hover-color: #f9fafb;
+  --active-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
 /* Global font setup */
 body, p, li, a, span, div, button {
   font-family: 'Inter', sans-serif;
@@ -15,4 +26,15 @@ h1, h2, h3, h4, h5, h6,
 
 .font-heading {
   font-family: 'Manrope', sans-serif;
+}
+
+
+::selection {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+
+input[type="checkbox"] {
+  accent-color: var(--primary-color);
 }

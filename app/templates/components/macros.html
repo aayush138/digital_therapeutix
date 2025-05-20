@@ -1,6 +1,6 @@
 {% macro flash_message(category, message) %}
-  <div class="flash-message flex items-center justify-center text-white rounded-md text-sm font-bold px-4 py-3 mt-2
-              {% if category == 'success' %} bg-green-500
+  <div class="flash-message flex items-center justify-center text-white rounded-2xl text-sm font-bold px-4 py-3 mt-2
+              {% if category == 'success' %} bg-green-700
               {% elif category == 'danger' %} bg-red-500
               {% elif category == 'warning' %} bg-yellow-500
               {% elif category == 'info' %} bg-blue-500
@@ -20,21 +20,25 @@
 
 {% macro field_success(field) %}
   {% if field.data and not field.errors %}
-    <p class="text-green-500 text-sm mt-1">Looks good!</p>
+    <p class="text-green-700 text-sm mt-1">Looks good!</p>
   {% endif %}
 {% endmacro %}
 
 {% macro input_classes(field) %}
-  block w-full rounded-md shadow-sm border px-3 py-3 text-sm focus:outline-none focus:ring-2 transition
+  block w-full rounded-2xl shadow-sm border px-4 py-4 text-sm focus:outline-none focus:ring-2 transition
   {% if field.errors %}
     border-red-500 focus:ring-red-500 focus:border-red-500
   {% elif field.data %}
-    border-green-500 focus:ring-green-500 focus:border-green-500
+    border-green-700 focus:ring-green-500 focus:border-green-700
   {% else %}
-    border-gray-300 focus:ring-indigo-500 focus:border-indigo-500
+    border-gray-300 focus:ring-green-500 focus:border-green-700
   {% endif %}
 {% endmacro %}
 
 {% macro button_classes() %}
-  bg-green-600 text-white w-full py-4 px-4 rounded-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition
+  bg-green-700 text-white w-full py-4 px-4 rounded-2xl hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-700 transition
+{% endmacro %}
+
+{% macro button_classes_secondary() %}
+  bg-transparent text-green-700 text-center border border-green-700 w-full py-4 px-4 rounded-2xl hover:bg-green-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-700 transition
 {% endmacro %}

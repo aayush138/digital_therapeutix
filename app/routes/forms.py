@@ -22,8 +22,8 @@ class SignupForm(FlaskForm):
 
 #  Login form for new users
 class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    email = StringField("Email Address *", validators=[DataRequired(), Email()])
+    password = PasswordField("Password *", validators=[DataRequired()])
     remember = BooleanField("Remember Me")
     submit = SubmitField("Log In")    
 
@@ -32,7 +32,7 @@ class LoginForm(FlaskForm):
 
 # Forgot password form for users who want to reset their password
 class ForgotPasswordForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Registered Email *", validators=[DataRequired(), Email()])
     submit = SubmitField("Send Reset Link")
 
 
@@ -40,8 +40,8 @@ class ForgotPasswordForm(FlaskForm):
 
 # Reset password form to set a new password
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField("New Password", validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField("Confirm Password", validators=[
+    password = PasswordField("New Password *", validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField("Confirm Password *", validators=[
         DataRequired(), EqualTo("password", message="Passwords must match")
     ])
     submit = SubmitField("Reset Password")

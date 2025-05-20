@@ -9,7 +9,7 @@ from flask import current_app, session
 def generate_verification_token(email):
     payload = {
         'email': email,
-        'exp': datetime.utcnow() + timedelta(hours=24)
+        'exp': datetime.now() + timedelta(hours=24)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -31,7 +31,7 @@ def verify_verification_token(token):
 def generate_reset_token(email):
     payload = {
         'email': email,
-        'exp': datetime.utcnow() + timedelta(hours=24)
+        'exp': datetime.now() + timedelta(hours=24)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -53,7 +53,7 @@ def verify_reset_token(token):
 def generate_access_token(user_id):
     payload = {
         'user_id': user_id,
-        'exp': datetime.utcnow() + timedelta(days=1)
+        'exp': datetime.now() + timedelta(days=1)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 

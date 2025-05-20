@@ -6,3 +6,74 @@
     });
   }, 3000);
 </script>
+
+<script>
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const fieldId = this.getAttribute('data-target');
+      const eyeOpenId = this.getAttribute('data-eye-open');
+      const eyeClosedId = this.getAttribute('data-eye-closed');
+      const passwordField = document.getElementById(fieldId);
+      const eyeOpen = document.getElementById(eyeOpenId);
+      const eyeClosed = document.getElementById(eyeClosedId);
+
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        if (eyeOpen) eyeOpen.classList.add('hidden');
+        if (eyeClosed) eyeClosed.classList.remove('hidden');
+      } else {
+        passwordField.type = 'password';
+        if (eyeOpen) eyeOpen.classList.remove('hidden');
+        if (eyeClosed) eyeClosed.classList.add('hidden');
+      }
+    });
+  });
+</script>
+
+
+<script>
+  function checkPasswordStrength(pw) {
+    return {
+      length: pw.length >= 8,
+      uppercase: /[A-Z]/.test(pw),
+      number: /\d/.test(pw),
+      special: /[^A-Za-z0-9]/.test(pw)
+    };
+  }
+
+  const pwInput = document.getElementById('password-field');
+  const suggestions = document.getElementById('password-suggestions');
+
+  pwInput.addEventListener('input', function() {
+    suggestions.classList.remove('hidden');
+    const val = pwInput.value;
+    const checks = checkPasswordStrength(val);
+
+    // Helper to update each item
+    function updateItem(id, iconId, passed) {
+      const item = document.getElementById(id);
+      const icon = document.getElementById(iconId);
+      if (passed) {
+        item.classList.remove('text-gray-500', 'text-red-600');
+        item.classList.add('text-green-600');
+        icon.textContent = '✔';
+      } else {
+        item.classList.remove('text-green-600');
+        item.classList.add('text-gray-500');
+        icon.textContent = '✗';
+      }
+    }
+
+    updateItem('pw-length', 'icon-length', checks.length);
+    updateItem('pw-uppercase', 'icon-uppercase', checks.uppercase);
+    updateItem('pw-number', 'icon-number', checks.number);
+    updateItem('pw-special', 'icon-special', checks.special);
+  });
+
+  // Hide suggestions if field is empty
+  pwInput.addEventListener('blur', function() {
+    if (!pwInput.value) {
+      suggestions.classList.add('hidden');
+    }
+  });
+</script>
