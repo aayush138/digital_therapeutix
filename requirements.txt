@@ -8,3 +8,4 @@ Werkzeug
 WTForms
 PyJWT
 email_validator
+Flask-Migrate

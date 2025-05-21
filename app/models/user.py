@@ -20,6 +20,7 @@ class User(db.Model):
 
     registered_at = db.Column(db.DateTime, default=datetime.now)
     last_verification_reminder = db.Column(db.DateTime, nullable=True)
+    reset_token = db.Column(db.String(256), nullable=True)
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)

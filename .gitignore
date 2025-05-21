@@ -4,3 +4,4 @@ __pycache__
 *.pyc
 instance
 flask_session
+migrations

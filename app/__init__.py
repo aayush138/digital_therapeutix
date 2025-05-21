@@ -1,4 +1,4 @@
-from flask import Flask
+from app.extensions import db, migrate, Flask
 
 def create_app():
     app = Flask(__name__)
@@ -6,6 +6,7 @@ def create_app():
 
     from app.extensions import db, mail, sess
     db.init_app(app)
+    migrate.init_app(app, db)
     mail.init_app(app)
     sess.init_app(app)
 

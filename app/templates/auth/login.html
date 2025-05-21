@@ -5,12 +5,12 @@
 {% block content %}
 <div class="flex flex-col md:flex-row gap-[5vw] items-center justify-center min-h-[94vh]">
 <!-- Left Panel (Fixed to match design) -->
-<div class="md:w-1/2 flex items-center justify-center p-10 h-[90vh] rounded-3xl relative overflow-hidden bg-black">
+<div class="md:w-1/2 flex items-center justify-center p-10 h-[60vh] md:h-[90vh] rounded-3xl relative overflow-hidden bg-black">
   <div class="absolute inset-0 z-0">
-    <img src="{{ url_for('static', filename='images/phage-bg.jpg') }}" alt="Green DNA" class="object-cover w-full h-full opacity-80" />
+    <img src="{{ url_for('static', filename='images/phage-bg.webp') }}" alt="Green DNA" class="object-cover w-full h-full opacity-55" />
   </div>
   <div class="relative z-10 flex flex-col justify-end w-full max-w-2xl h-full pb-8">
-    <h2 class="text-5xl font-extrabold text-white leading-snug mb-4">
+    <h2 class="text-3xl leading-snug md:text-5xl md:leading-snug font-extrabold text-white mb-4">
       Welcome to Quint – AI-Powered Phage Matching Platform
     </h2>
     <p class="text-white text-base leading-relaxed">

@@ -129,29 +129,27 @@ def forgot_password():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             token = generate_reset_token(user.email)
+            user.reset_token = token
+            db.session.commit()
             send_password_reset_email(user.email, token)
         flash("If the email is registered, a reset link has been sent.", "info")
         return redirect(url_for('auth.login'))
     return render_template('auth/forgot_password.html', form=form)
 
 
-@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+@auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     email = verify_reset_token(token)
-    if not email:
-        flash("Invalid or expired token", "danger")
-        return redirect(url_for('auth.forgot_password'))
-
     user = User.query.filter_by(email=email).first()
-    if not user:
-        flash("User not found", "danger")
-        return redirect(url_for('auth.signup'))
+    if not email or user.reset_token != token:
+        flash("This reset link is invalid or has already been used.", "danger")
+        return redirect(url_for('auth.forgot_password'))
 
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)
+        user.reset_token = None  # Invalidate the token after use
         db.session.commit()
-        flash("Password reset successful. Please log in.", "success")
+        flash("Password has been reset successfully. Please log in.", "success")
         return redirect(url_for('auth.login'))
-
     return render_template('auth/reset_password.html', form=form)
