@@ -5,15 +5,13 @@ from app.extensions import mail
 
 # This function sends a verification email to the user
 def send_verification_email(user_email, token):
-    verify_url = url_for('auth.verify_email', token=token, _external=True)
-    subject = "Verify your email - Digital Therapeutix"
+    verify_url = url_for('auth.complete_application', token=token, _external=True)
+    subject = "Continue Your Application - Digital Therapeutix"
     html_body = f"""
     <h3>Welcome to Digital Therapeutix</h3>
-    <p>Click the link below to verify your email:</p>
-    <a href="{verify_url}">Verify Email</a>
-    <p>This link will expire in 24 hours.</p>
+    <p>Click below to complete your application. This link will expire in 7 days:</p>
+    <a href="{verify_url}">{verify_url}</a>
     """
-
     msg = Message(subject=subject, recipients=[user_email], html=html_body)
     mail.send(msg)
 

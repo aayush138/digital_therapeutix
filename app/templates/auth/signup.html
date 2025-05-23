@@ -1,53 +1,147 @@
 {% extends 'base.html' %}
 {% block title %}Sign Up{% endblock %}
+{% import 'components/macros.html' as components %}
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h3 class="text-center">Create Your Doctor Account</h3>
-      <form method="POST">
-        {{ form.hidden_tag() }}
-        
-        <div class="mb-3">
-          {{ form.full_name.label(class="form-label") }}
-          {{ form.full_name(class="form-control") }}
-        </div>
 
-        <div class="mb-3">
-          {{ form.email.label(class="form-label") }}
-          {{ form.email(class="form-control") }}
-        </div>
-
-        <div class="mb-3">
-          {{ form.license_number.label(class="form-label") }}
-          {{ form.license_number(class="form-control") }}
-        </div>
-
-        <div class="mb-3">
-          {{ form.license_country.label(class="form-label") }}
-          {{ form.license_country(class="form-control") }}
-        </div>
-
-        <div class="mb-3">
-          {{ form.institution.label(class="form-label") }}
-          {{ form.institution(class="form-control") }}
-        </div>
-
-        <div class="mb-3">
-          {{ form.password.label(class="form-label") }}
-          {{ form.password(class="form-control") }}
-        </div>
-
-        <div class="mb-3">
-          {{ form.confirm_password.label(class="form-label") }}
-          {{ form.confirm_password(class="form-control") }}
-        </div>
-
-        <div class="d-grid">
-          {{ form.submit(class="btn btn-primary") }}
-        </div>
-      </form>
+<div class="flex flex-col-reverse md:flex-row gap-[5vw] items-center justify-center min-h-[94vh]">
+  <!-- Left Panel -->
+  <div class="w-full md:w-1/2 px-6 py-6">
+    <div class="flex justify-left mb-4">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DTPx Logo" class="h-12" />
     </div>
+    <h2 class="text-left text-3xl font-semibold mb-4">Create Your Account & Explore AI Designed to Elevate Your Practice</h2>
+    <p class="text-xl mb-8">Enhance your medical practice with powerful insights from Quint & QuintX.</p>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          {{ components.flash_message(category, message) }}
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+
+    <form method="POST" class="space-y-6">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-4">
+        {{ form.full_name.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+        {{ form.full_name(class=components.input_classes(form.email), placeholder="Enter your full name") }}
+        {{ components.field_errors(form.email) }}
+        {{ components.field_success(form.email) }}
+      </div>
+
+      <div class="mb-4">
+        {{ form.email.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+        {{ form.email(class=components.input_classes(form.email), placeholder="example@company.com") }}
+        {{ components.field_errors(form.email) }}
+        {{ components.field_success(form.email) }}
+      </div>
+
+      <div class="mb-4 relative">
+        {{ form.password.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+        <div class="relative">
+          {{ form.password(class=components.input_classes(form.password) + ' pr-10', placeholder="Enter password for account", id="password-field") }}
+          <button type="button" id="toggle-password" tabindex="-1"
+            class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none toggle-password" data-target="password-field"data-eye-open="eye-open-1" data-eye-closed="eye-closed-1">
+            <!-- Eye icon (visible) -->
+            <svg id="eye-open-1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <!-- Eye-off icon (hidden, toggled via JS) -->
+            <svg id="eye-closed-1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95M6.634 6.634A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.293 5.95M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3l18 18" />
+            </svg>
+          </button>
+        </div>
+        {{ components.field_errors(form.password) }}
+      </div>
+
+      <div id="password-suggestions" class="grid grid-cols-2 gap-3 mb-8 mt-2 hidden">
+        <div id="pw-length" class="flex items-center gap-2 text-red-500">
+          <span id="icon-length">✗</span>
+          <span>8 characters</span>
+        </div>
+        <div id="pw-uppercase" class="flex items-center gap-2 text-red-500">
+          <span id="icon-uppercase">✗</span>
+          <span>Uppercase letter (A-Z)</span>
+        </div>
+        <div id="pw-number" class="flex items-center gap-2 text-red-500">
+          <span id="icon-number">✗</span>
+          <span>Number (0-9)</span>
+        </div>
+        <div id="pw-special" class="flex items-center gap-2 text-red-500">
+          <span id="icon-special">✗</span>
+          <span>Special character (@#$)</span>
+        </div>
+      </div>
+
+
+
+      <div class="mb-4 relative">
+        {{ form.confirm_password.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+        <div class="relative">
+          {{ form.confirm_password(class=components.input_classes(form.confirm_password) + ' pr-10', placeholder="Re-type your new password", id="confirm-password-field") }}
+          <button type="button" id="toggle-password" tabindex="-1"
+            class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none toggle-password" data-target="confirm-password-field" data-eye-open="eye-open-2" data-eye-closed="eye-closed-2">
+            <!-- Eye icon (visible) -->
+            <svg id="eye-open-2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <!-- Eye-off icon (hidden, toggled via JS) -->
+            <svg id="eye-closed-2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95M6.634 6.634A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.293 5.95M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3l18 18" />
+            </svg>
+          </button>
+        </div>
+        {{ components.field_errors(form.confirm_password) }}
+        {{ components.field_success(form.confirm_password) }}
+      </div>
+
+
+      <div class="mt-4">
+        {{ form.submit(class=components.button_classes()) }}
+      </div>
+
+      <p class="text-left text-sm mt-4">
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}" class="text-green-700 hover:underline">Login Here</a>
+      </p>
+    </form>
+
+    <footer class="text-xs text-left mt-8 text-gray-500">
+      © 2025 <strong>Digital Theuphatics</strong>. All rights reserved. 
+      <a href="#" class="underline mx-1">Terms & Conditions</a> | 
+      <a href="#" class="underline ml-1">Privacy Policy</a>
+    </footer>
   </div>
+
+  <!-- Right Panel -->
+<div class="md:w-1/2 flex items-center justify-center p-10 h-[60vh] md:h-[90vh] rounded-3xl relative overflow-hidden bg-black">
+  <div class="absolute inset-0 z-0">
+    <img src="{{ url_for('static', filename='images/phage-bg.webp') }}" alt="Green DNA" class="object-cover w-full h-full opacity-55" />
+  </div>
+  <div class="relative z-10 flex flex-col justify-end w-full max-w-2xl h-full pb-8">
+    <h2 class="text-3xl leading-snug md:text-5xl md:leading-snug font-extrabold text-white mb-4">
+      Welcome to Quint – AI-Powered Phage Matching Platform
+    </h2>
+    <p class="text-white text-base leading-relaxed">
+      Easily upload pathogen data and let our advanced AI models help you identify targeted phage therapy options faster than ever.
+    </p>
+  </div>
+</div>
 </div>
 {% endblock %}

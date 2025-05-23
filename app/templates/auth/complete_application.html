@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% block title %}Complete Your Application{% endblock %}
+{% import 'components/macros.html' as components %}
+{% block content %}
+
+<div class="flex flex-col md:flex-row gap-[5vw] items-center justify-center min-h-[94vh]">
+  <!-- Left Panel -->
+  <div class="w-full md:w-1/2 px-6 py-6">
+    <div class="flex justify-left mb-4">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DTPx Logo" class="h-12" />
+    </div>
+    <div class="flex space-x-1 mb-3" id="progress-indicator">
+      <div class="w-4 h-4 rounded" id="dot-1"></div>
+      <div class="w-4 h-4 rounded" id="dot-2"></div>
+      <div class="w-4 h-4 rounded" id="dot-3"></div>
+    </div>
+
+    <p class="text-sm text-gray-600 font-medium mb-8" id="step-label">STEP 1 OF 3</p>
+    <h2 class="text-left text-3xl font-semibold mb-4">Let’s Get You Started</h2>
+    <p class="text-gray-600">Please provide a few basic details to create your account and begin the verification process.</p>
+
+    <!-- Step nav & footer: Desktop only -->
+    <div class="hidden md:block">
+      <div class="mt-10 flex space-x-4" id="step-nav">
+        <button type="button" class="{{ components.button_classes_secondary() }}" id="backBtn">Back</button>
+        <button type="button" class="{{ components.button_classes() }}" id="nextBtn">Continue</button>
+      </div>
+      <footer class="text-xs text-left mt-8 text-gray-500">
+        © 2025 <strong>Digital Theuphatics</strong>. All rights reserved. 
+        <a href="#" class="underline mx-1">Terms & Conditions</a> | 
+        <a href="#" class="underline ml-1">Privacy Policy</a>
+      </footer>
+    </div>
+  </div>
+
+    <!-- Right Panel -->
+  <div class="md:w-1/2 flex items-center justify-center p-6 h-[60vh] md:h-[80vh] rounded-3xl relative overflow-hidden bg-gradient-to-br from-green-500/25 via-green-500/25 to-orange-500/25">
+
+    <div class="relative z-10 flex flex-col justify-center w-full max-w-2xl h-full">
+      <div class="bg-white rounded-2xl shadow-lg p-10 w-full h-full overflow-auto">
+        <form id="multiStepForm" method="POST" class=" w-full">
+          {{ form.hidden_tag() }}
+          <!-- Step 1: Basic Details -->
+          <div class="step" id="step-1">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Basic Details</h2>
+            <div class="space-y-7">
+              <div>
+                {{ form.preferred_name.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.preferred_name(class=components.input_classes(form.preferred_name), placeholder="Preferred name") }}
+                {{ components.field_errors(form.preferred_name) }}
+              </div>
+              <div>
+                {{ form.backup_email.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.backup_email(class=components.input_classes(form.backup_email), placeholder="example@company.com") }}
+                {{ components.field_errors(form.backup_email) }}
+              </div>
+              <div>
+                {{ form.phone_number.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.phone_number(class=components.input_classes(form.phone_number), placeholder="+13013013010") }}
+                {{ components.field_errors(form.phone_number) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Address -->
+          <div class="step hidden" id="step-2">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Address</h2>
+            <div class="space-y-7">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  {{ form.clinic_name.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.clinic_name(class=components.input_classes(form.clinic_name), placeholder="Clinic/Hospital Name") }}
+                  {{ components.field_errors(form.clinic_name) }}
+                </div>
+                <div>
+                  {{ form.clinic_email.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.clinic_email(class=components.input_classes(form.clinic_email), placeholder="Clinic/Hospital Email Address") }}
+                  {{ components.field_errors(form.clinic_email) }}
+                </div>
+              </div>
+              <div>
+                {{ form.address_street.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.address_street(class=components.input_classes(form.address_street), placeholder="Street Address") }}
+                {{ components.field_errors(form.address_street) }}
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  {{ form.address_city.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.address_city(class=components.input_classes(form.address_city), placeholder="City") }}
+                  {{ components.field_errors(form.address_city) }}
+                </div>
+                <div>
+                  {{ form.address_state.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.address_state(class=components.input_classes(form.address_state), placeholder="State/Province") }}
+                  {{ components.field_errors(form.address_state) }}
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  {{ form.address_zip.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.address_zip(class=components.input_classes(form.address_zip), placeholder="ZIP/Postal Code") }}
+                  {{ components.field_errors(form.address_zip) }}
+                </div>
+                <div>
+                  {{ form.address_country.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.address_country(class=components.input_classes(form.address_country), placeholder="Select Country") }}
+                  {{ components.field_errors(form.address_country) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Medical License & Credentials -->
+          <div class="step hidden" id="step-3">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Medical License Details</h2>
+            <div class="space-y-7">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  {{ form.license_number.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.license_number(class=components.input_classes(form.license_number), placeholder="Medical License Number") }}
+                  {{ components.field_errors(form.license_number) }}
+                </div>
+                <div>
+                  {{ form.license_country.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.license_country(class=components.input_classes(form.license_country), placeholder="Issuing State/Country") }}
+                  {{ components.field_errors(form.license_country) }}
+                </div>
+              </div>
+
+              <h2 class="text-xl font-semibold text-gray-800 mt-8 mb-4">Medical Credentials & Affiliation</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  {{ form.medical_degree.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.medical_degree(class=components.input_classes(form.medical_degree), placeholder="Example: MD, DO, MBBS, PhD, MPH") }}
+                  {{ components.field_errors(form.medical_degree) }}
+                </div>
+
+                <div>
+                  {{ form.specialty.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                  {{ form.specialty(class=components.input_classes(form.specialty), placeholder="Medical specialty (e.g., Infectious Disease, Paediatrics, Internal Medicine)") }}
+                  {{ components.field_errors(form.specialty) }}
+                </div>
+              </div> 
+              <div>
+                {{ form.subspecialty.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.subspecialty(class=components.input_classes(form.subspecialty), placeholder="Subspecialty") }}
+                {{ components.field_errors(form.subspecialty) }}
+              </div>
+              <div>
+                {{ form.current_employer.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.current_employer(class=components.input_classes(form.current_employer), placeholder="Current Employer") }}
+                {{ components.field_errors(form.current_employer) }}
+              </div>
+            </div>
+          </div>
+        </form>
+
+      </div> 
+    </div>
+  </div>
+
+  <!-- Step nav & footer: Mobile only, below right panel -->
+  <div class="block md:hidden w-full px-6">
+    <div class="mt-10 flex space-x-4" id="step-nav-mobile">
+      <button type="button" class="{{ components.button_classes_secondary() }}" id="backBtn">Back</button>
+      <button type="button" class="{{ components.button_classes() }}" id="nextBtn">Continue</button>
+    </div>
+    <footer class="text-xs text-center mt-8 text-gray-500">
+      © 2025 <strong>Digital Theuphatics</strong>. All rights reserved. 
+      <a href="#" class="underline mx-1">Terms & Conditions</a> | 
+      <a href="#" class="underline ml-1">Privacy Policy</a>
+    </footer>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+  <div class="bg-white rounded-2xl shadow-2xl m-4 px-4 py-8 md:px-8 md:py-8 md:p-8 md:m-auto max-w-3xl w-full flex flex-col items-center text-center">
+    <!-- Check Icon -->
+    <img src="{{ url_for('static', filename='images/success.svg') }}" alt="Success" class="h-8 mb-6 w-full h-20" />
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">You’re Almost There! Verification in 24–48 Hours</h2>
+    <p class="text-gray-600 mb-6">
+      Your details have been submitted and your medical license is now being verified.<br>
+      We’ll email you at <span class="font-semibold text-green-600" id="modal-email">{{user_email}}</span> once it’s approved — typically within 24–48 hours.
+    </p>
+    <a href="{{ url_for('auth.login') }}" class="{{ components.button_classes() }} w-full mb-4">Go to Login</a>
+    <p class="text-xs text-gray-500">Need help? <a href="mailto:support@example.com" class="underline">Contact our support team</a> anytime.</p>
+  </div>
+</div>
+
+
+<script>
+let currentStep = 1;
+const totalSteps = 3;
+
+// Validate required fields in the current step
+function validateStep(step) {
+  let valid = true;
+  const stepDiv = document.getElementById('step-' + step);
+  const inputs = stepDiv.querySelectorAll('input[required], select[required], textarea[required]');
+  inputs.forEach(input => {
+    if (input.offsetParent !== null && !input.value.trim()) {
+      input.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+      valid = false;
+    } else {
+      input.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+    }
+  });
+  return valid;
+}
+
+// Remove error highlight on input
+document.addEventListener('input', function(e) {
+  if (e.target.closest('#multiStepForm')) {
+    e.target.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+  }
+});
+
+// Update progress dots and step label
+function updateProgress(step) {
+  for (let i = 1; i <= totalSteps; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (i < step) {
+      dot.className = "w-4 h-4 bg-green-700 rounded";
+    } else if (i === step) {
+      dot.className = "w-4 h-4 bg-green-700 rounded";
+    } else {
+      dot.className = "w-4 h-4 bg-green-200 rounded";
+    }
+  }
+  document.getElementById('step-label').textContent = `STEP ${step} OF ${totalSteps}`;
+}
+
+// Show the current step and update UI
+function showStep(step) {
+  document.querySelectorAll('.step').forEach(div => div.classList.add('hidden'));
+  document.getElementById('step-' + step).classList.remove('hidden');
+  // Update both sets of nav buttons
+  updateNavButtons(step);
+  updateProgress(step);
+}
+
+// Update nav buttons (both desktop and mobile)
+function updateNavButtons(step) {
+  // Desktop
+  const backBtn = document.querySelector('#step-nav #backBtn');
+  const nextBtn = document.querySelector('#step-nav #nextBtn');
+  // Mobile
+  const backBtnMobile = document.querySelector('#step-nav-mobile #backBtn');
+  const nextBtnMobile = document.querySelector('#step-nav-mobile #nextBtn');
+
+  [backBtn, backBtnMobile].forEach(btn => {
+    if (btn) btn.style.display = step === 1 ? 'none' : '';
+  });
+  [nextBtn, nextBtnMobile].forEach(btn => {
+    if (btn) btn.textContent = (step === totalSteps) ? 'Submit' : 'Continue';
+  });
+}
+
+// Navigation handlers for both navs
+function attachNavHandlers() {
+  // Desktop
+  const backBtn = document.querySelector('#step-nav #backBtn');
+  const nextBtn = document.querySelector('#step-nav #nextBtn');
+  // Mobile
+  const backBtnMobile = document.querySelector('#step-nav-mobile #backBtn');
+  const nextBtnMobile = document.querySelector('#step-nav-mobile #nextBtn');
+
+  [backBtn, backBtnMobile].forEach(btn => {
+    if (btn) btn.onclick = function() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    };
+  });
+
+  [nextBtn, nextBtnMobile].forEach(btn => {
+    if (btn) btn.onclick = function() {
+      if (currentStep < totalSteps) {
+        if (validateStep(currentStep)) {
+          currentStep++;
+          showStep(currentStep);
+        }
+      } else {
+        if (validateStep(currentStep)) {
+          document.getElementById('multiStepForm').submit();
+        }
+      }
+    };
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  showStep(currentStep);
+  attachNavHandlers();
+});
+</script>
+
+<script>
+{% if show_modal %}
+  // Show modal on page load
+  document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('successModal').classList.remove('hidden');
+  });
+{% endif %}
+</script>
+
+
+{% endblock %}

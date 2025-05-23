@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app.routes.forms import SignupForm, ForgotPasswordForm, ResetPasswordForm, LoginForm
+from datetime import datetime, timedelta, timezone
+from flask import Blueprint, render_template, redirect, url_for, flash, session
+from app.routes.forms import SignupForm, ForgotPasswordForm, ResetPasswordForm, LoginForm, CompleteApplicationForm
 from app.models.user import User, db
-from app.utils.helpers import generate_verification_token, generate_reset_token, verify_reset_token, generate_access_token
+from app.utils.helpers import generate_verification_token, generate_reset_token, verify_reset_token, generate_access_token, verify_verification_token
 from app.utils.email import send_verification_email, send_password_reset_email
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -20,26 +21,62 @@ def signup():
     if form.validate_on_submit():
         existing = User.query.filter_by(email=form.email.data).first()
         if existing:
-            flash("Email already registered", "danger")
-            return render_template('auth/signup.html', form=form)
+            flash("Email already registered.", "danger")
+            return redirect(url_for('auth.login'))
 
         new_user = User(
             full_name=form.full_name.data,
-            email=form.email.data,
-            license_number=form.license_number.data,
-            license_country=form.license_country.data,
-            institution=form.institution.data
+            email=form.email.data
         )
         new_user.set_password(form.password.data)
+
+        # Send a verification email with a 7-day token
+        token = generate_verification_token(new_user.email, expires_days=7)
+        new_user.verification_token = token
+        new_user.verification_token_expiry = datetime.now(timezone.utc) + timedelta(days=7)
         db.session.add(new_user)
         db.session.commit()
-
-        token = generate_verification_token(new_user.email)
         send_verification_email(new_user.email, token)
 
-        flash("Signup successful. Please check your email to verify your account.", "success")
+        flash("Signup successful. Please check your email to complete the application. Link valid for 7 days.", "success")
         return redirect(url_for('auth.login'))
+
     return render_template('auth/signup.html', form=form)
+
+# For the completing signup application.
+@auth_bp.route('/complete-application/<token>', methods=['GET', 'POST'])
+def complete_application(token):
+    email = verify_verification_token(token)
+    if not email:
+        flash("The application link has expired or is invalid.", "danger")
+        return redirect(url_for('auth.signup'))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash("User not found.", "danger")
+        return redirect(url_for('auth.signup'))
+    
+    if not user.verification_token or user.verification_token != token or not user.verification_token_expiry or (
+        (user.verification_token_expiry.tzinfo is None and user.verification_token_expiry.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc))
+        or
+        (user.verification_token_expiry.tzinfo is not None and user.verification_token_expiry < datetime.now(timezone.utc))
+    ):
+        flash("Your application has already been submitted. You will receive an email notification once it has been reviewed by our team.", "danger")
+        return redirect(url_for('auth.signup'))
+
+
+    form = CompleteApplicationForm(obj=user)
+
+    if form.validate_on_submit():
+        form.populate_obj(user)
+        user.is_email_verified = True
+        user.verification_token = None
+        user.verification_token_expiry = None
+        db.session.commit()
+        flash("Application completed. Awaiting admin approval.", "success")
+        return render_template("auth/complete_application.html", form=form, show_modal=True, user_email=user.email)
+
+    return render_template("auth/complete_application.html", form=form)
 
 
 
@@ -130,6 +167,7 @@ def forgot_password():
         if user:
             token = generate_reset_token(user.email)
             user.reset_token = token
+            user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=1)  # 1 hour expiry
             db.session.commit()
             send_password_reset_email(user.email, token)
         flash("If the email is registered, a reset link has been sent.", "info")
@@ -140,8 +178,13 @@ def forgot_password():
 @auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     email = verify_reset_token(token)
-    user = User.query.filter_by(email=email).first()
-    if not email or user.reset_token != token:
+    user = User.query.filter_by(email=email).first() if email else None
+    
+    if not user or user.reset_token != token or not user.reset_token_expiry or ((user.reset_token_expiry.tzinfo is None and user.reset_token_expiry.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc)) or (user.reset_token_expiry.tzinfo is not None and user.reset_token_expiry < datetime.now(timezone.utc))):
+        if user:
+            user.reset_token = None
+            user.reset_token_expiry = None
+            db.session.commit()
         flash("This reset link is invalid or has already been used.", "danger")
         return redirect(url_for('auth.forgot_password'))
 
@@ -149,7 +192,8 @@ def reset_password(token):
     if form.validate_on_submit():
         user.set_password(form.password.data)
         user.reset_token = None  # Invalidate the token after use
+        user.reset_token_expiry = None
         db.session.commit()
-        flash("Password has been reset successfully. Please log in.", "success")
+        flash("Your password has been reset. Please log in.", "success")
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)

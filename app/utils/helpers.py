@@ -1,15 +1,15 @@
 import jwt
-from datetime import datetime, timedelta
-from flask import current_app, session
+from datetime import datetime, timedelta, timezone
+from flask import current_app
 
 
 
 
-# This function generates a JWT token for email verification
-def generate_verification_token(email):
+# This function generates a JWT token for email verification 7-days Validity
+def generate_verification_token(email, expires_days=7):
     payload = {
         'email': email,
-        'exp': datetime.now() + timedelta(hours=24)
+        'exp': datetime.now(timezone.utc) + timedelta(days=expires_days)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -31,7 +31,7 @@ def verify_verification_token(token):
 def generate_reset_token(email):
     payload = {
         'email': email,
-        'exp': datetime.now() + timedelta(hours=24)
+        'exp': datetime.now(timezone.utc) + timedelta(hours=24)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -53,7 +53,7 @@ def verify_reset_token(token):
 def generate_access_token(user_id):
     payload = {
         'user_id': user_id,
-        'exp': datetime.now() + timedelta(days=1)
+        'exp': datetime.now(timezone.utc) + timedelta(days=1)
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
 
