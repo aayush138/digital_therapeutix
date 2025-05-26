@@ -1,4 +1,7 @@
 from app.extensions import db, migrate, Flask
+from app.routes.auth import auth_bp
+from app.routes.admin import admin_bp
+from app.routes.dashboard import dashboard_bp
 
 def create_app():
     app = Flask(__name__)
@@ -10,8 +13,10 @@ def create_app():
     mail.init_app(app)
     sess.init_app(app)
 
-    from app.routes.auth import auth_bp
+    # Register blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(dashboard_bp)
 
     return app
 

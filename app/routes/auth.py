@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from flask import Blueprint, render_template, redirect, url_for, flash, session
+from flask import Blueprint, render_template, redirect, url_for, flash, session, current_app
 from app.routes.forms import SignupForm, ForgotPasswordForm, ResetPasswordForm, LoginForm, CompleteApplicationForm
 from app.models.user import User, db
 from app.utils.helpers import generate_verification_token, generate_reset_token, verify_reset_token, generate_access_token, verify_verification_token
@@ -84,41 +84,60 @@ def complete_application(token):
 # For the login route
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # Redirect if already logged in
+    if session.get('is_admin'):
+        return redirect(url_for('admin.dashboard'))
+    elif session.get('user_id'):
+        return redirect(url_for('dashboard.index'))
+    
+    
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-
+        email = form.email.data
+        password = form.password.data
         remember_me = form.remember.data
 
+        # Check if admin
+        admin = next((a for a in current_app.config["ADMINS"] 
+                      if a["email"] == email and a["password"] == password), None)
+        if admin:
+            session.permanent = remember_me
+            session['is_admin'] = True
+            session['admin_name'] = admin["name"]
+            session['admin_email'] = admin["email"]
+            flash("Logged in as admin", "success")
+            return redirect(url_for("admin.dashboard"))
+
+        # Check if doctor
+        user = User.query.filter_by(email=email).first()
         if not user:
             flash("No account found with this email.", "danger")
             return render_template("auth/login.html", form=form)
-        
-        if not user.check_password(form.password.data):
+
+        if not user.check_password(password):
             flash("Incorrect password", "danger")
             return render_template("auth/login.html", form=form)
 
         if not user.is_email_verified:
             flash("Email not verified. Please check your inbox.", "warning")
             return render_template("auth/login.html", form=form)
-        
+
         if not user.is_license_verified:
             flash("Your license is under review. Please wait for admin approval.", "warning")
             return render_template("auth/login.html", form=form)
-        
-         # Set session permanence based on remember_me
-        session.permanent = remember_me
 
-        # All good – set JWT + session
+        # Valid doctor login
+        session.permanent = remember_me
         token = generate_access_token(user.id)
         session['jwt_token'] = token
         session['user_id'] = user.id
         session['user_email'] = user.email
+        session['is_admin'] = False
+
         flash("Logged in successfully!", "success")
-        return redirect(url_for("dashboard.index"))  # or your actual dashboard
+        return redirect(url_for("dashboard.index"))
 
     return render_template("auth/login.html", form=form)
-
 
 
 

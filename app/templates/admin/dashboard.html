@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Pending Doctors</h3>
+  {% if users %}
+    <table class="table">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <a href="{{ url_for('admin.approve_user', user_id=user.id) }}" class="btn btn-success btn-sm">Approve</a>
+              <a href="{{ url_for('admin.reject_user', user_id=user.id) }}" class="btn btn-danger btn-sm">Reject</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No pending doctors.</p>
+  {% endif %}
+
+  <form action="{{ url_for('auth.logout') }}" method="post" class="mt-4">
+    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
+  </form>
+</div>
+{% endblock %}

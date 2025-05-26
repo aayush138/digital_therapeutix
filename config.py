@@ -18,3 +18,31 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+
+    ADMINS = [
+        {
+            "name": os.environ.get("ADMIN_1_NAME"),
+            "email": os.environ.get("ADMIN_1_EMAIL"),
+            "password": os.environ.get("ADMIN_1_PASSWORD"),
+        },
+        {
+            "name": os.environ.get("ADMIN_2_NAME"),
+            "email": os.environ.get("ADMIN_2_EMAIL"),
+            "password": os.environ.get("ADMIN_2_PASSWORD"),
+        },
+        {
+            "name": os.environ.get("ADMIN_3_NAME"),
+            "email": os.environ.get("ADMIN_3_EMAIL"),
+            "password": os.environ.get("ADMIN_3_PASSWORD"),
+        },
+        {
+            "name": os.environ.get("ADMIN_4_NAME"),
+            "email": os.environ.get("ADMIN_4_EMAIL"),
+            "password": os.environ.get("ADMIN_4_PASSWORD"),
+        },
+        {
+            "name": os.environ.get("ADMIN_5_NAME"),
+            "email": os.environ.get("ADMIN_5_EMAIL"),
+            "password": os.environ.get("ADMIN_5_PASSWORD"),
+        },
+    ]
