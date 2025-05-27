@@ -11,9 +11,19 @@
   <td class="px-4 py-4">{{ user.license_number }}</td>
   <td class="px-4 py-4">{{ user.registered_at.strftime('%b %d %Y') if user.registered_at else '' }}</td>
   <td class="px-4 py-4 flex justify-end space-x-2">
-    {{ components.info_button('View') }}
-    <button class="{{ components.button_classes_success() }}">✓ Accept</button>
-    <button class="{{ components.button_classes_danger() }}">✕ Reject</button>
+    <button type="button" class="{{ components.button_classes_info() }} open-user-modal" data-user-id="{{ user.id }}">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <span>View</span>
+    </button>
+    <form action="{{ url_for('admin.approve_user', user_id=user.id) }}" method="post" style="display:inline;">
+      <button type="submit" class="{{ components.button_classes_success() }}">✓ Accept</button>
+    </form>
+    <form action="{{ url_for('admin.reject_user', user_id=user.id) }}" method="post" style="display:inline;">
+      <button type="submit" class="{{ components.button_classes_danger() }}">✕ Reject</button>
+    </form>
   </td>
 </tr>
 {% else %}
@@ -21,3 +31,129 @@
   <td colspan="4" class="px-4 py-8 text-center text-gray-400">No users found.</td>
 </tr>
 {% endfor %}
+
+
+
+<!-- Modal Overlay + Panel -->
+<div id="userDetailsModal" class="fixed flex justify-end inset-0 z-50 hidden items-center bg-black bg-opacity-40 transition-opacity duration-300">
+  <div
+    id="userPanel"
+    class="bg-white rounded-l-xl shadow-xl w-full max-w-4xl p-6 space-y-4 h-screen overflow-y-auto transform translate-x-full transition-transform duration-300 relative right-0">
+    <!-- Floating Close Button -->
+    <button
+      id="closeModal"
+      class="absolute left-10 top-1/2 -translate-y-1/2 -translate-x-full bg-white border border-gray-300 shadow-lg w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 z-50"
+      aria-label="Close User Details"
+      type="button"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <!-- Modal Content -->
+    <div id="userDetailsContent" class="flex flex-col gap-6">
+      <!-- Content will be loaded here dynamically -->
+      <div class="flex justify-center items-center h-full">
+        <span class="text-gray-400">Loading...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('userDetailsModal');
+  const panel = document.getElementById('userPanel');
+  const closeBtn = document.getElementById('closeModal');
+  const userDetailsContent = document.getElementById('userDetailsContent');
+  const openBtns = document.querySelectorAll('.open-user-modal');
+
+  openBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const userId = btn.getAttribute('data-user-id');
+      userDetailsContent.innerHTML = '<div class="flex justify-center items-center h-full"><span class="text-gray-400">Loading...</span></div>';
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.add('bg-opacity-40');
+        panel.classList.remove('translate-x-full');
+      }, 10);
+
+      fetch(`/admin/user/${userId}/details`)
+        .then(response => response.json())
+        .then(data => {
+          userDetailsContent.innerHTML = `
+            <div>
+            <h2 class="text-3xl font-semibold text-gray-800">User details</h2>
+            </div>
+            <div class="flex items-center space-x-4">
+            <img src="{{ url_for('static', filename='/images/profile.jpg') }}" class="w-10 h-10 rounded-full" alt="Avatar">
+            <div>
+                <h3 class="font-medium text-gray-800">${data.full_name}</h3>
+                <p class="text-sm text-gray-500">#${data.license_number}</p>
+            </div>
+            </div>
+            <div class="border rounded-lg p-4 space-y-2">
+            <h4 class="text-base font-medium text-green-700">Basic Details</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <div><strong>Full Name:</strong> ${data.full_name || ''}</div>
+                <div><strong>Preferred Name:</strong> ${data.preferred_name || ''}</div>
+                <div><strong>Work Email:</strong> ${data.email || ''}</div>
+                <div><strong>Backup Email Address:</strong> ${data.backup_email || ''}</div>
+                <div><strong>Phone Number:</strong> ${data.phone_number || ''}</div>
+                <div><strong>Registered At:</strong> ${data.register_date || ''}</div>
+            </div>
+            </div>
+            <div class="border rounded-lg p-4 space-y-2">
+            <h4 class="text-base font-medium text-green-700">Address</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <div><strong>Clinic/Hospital Name:</strong> ${data.clinic_name || ''}</div>
+                <div><strong>Clinic/Hospital Email Address:</strong> ${data.clinic_email || ''}</div>
+                <div><strong>Street Address:</strong> ${data.address_street || ''}</div>
+                <div><strong>City:</strong> ${data.address_city || ''}</div>
+                <div><strong>State/Province:</strong> ${data.address_state || ''}</div>
+                <div><strong>ZIP/Postal Code:</strong> ${data.address_zip || ''}</div>
+                <div><strong>Country:</strong> ${data.address_country || ''}</div>
+            </div>
+            </div>
+            <div class="border rounded-lg p-4 space-y-2">
+            <h4 class="text-base font-medium text-green-700">Medical License Details</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <div><strong>Medical License No.:</strong> ${data.license_number || ''}</div>
+                <div><strong>License Country:</strong> ${data.license_country || ''}</div>
+            </div>
+            </div>
+            <div class="border rounded-lg p-4 space-y-2">
+            <h4 class="text-base font-medium text-green-700">Credentials & Affiliation</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <div><strong>Medical Degree:</strong> ${data.medical_degree || ''}</div>
+                <div><strong>Medical Specialty:</strong> ${data.specialty || ''}</div>
+                <div><strong>Subspecialty:</strong> ${data.subspecialty || ''}</div>
+                <div><strong>Current Employer:</strong> ${data.current_employer || ''}</div>
+            </div>
+            </div>
+            <div class="flex justify-between items-center pt-4">
+            <button id="backBtn" class="text-gray-600 hover:underline text-base">Back</button>
+            <div class="space-x-2">
+                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm rounded-md">✕ Reject</button>
+                <button class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 text-sm rounded-md">✓ Accept</button>
+            </div>
+            </div>
+          `;
+          document.getElementById('backBtn').onclick = closeModal;
+        });
+    });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+
+  function closeModal() {
+    // modal.classList.remove('bg-opacity-40');
+    panel.classList.add('translate-x-full');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 200);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
