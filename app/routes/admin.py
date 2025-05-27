@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, flash
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from app.models.user import User, db
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -11,8 +11,12 @@ def restrict_to_admin():
 
 @admin_bp.route('/dashboard')
 def dashboard():
-    pending_users = User.query.filter_by(is_email_verified=True, is_license_verified=False).all()
-    return render_template("admin/dashboard.html", users=pending_users)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 8, type=int)
+    users = User.query.filter_by(is_email_verified=True, is_license_verified=False).order_by(User.registered_at.desc()).paginate(page=page, per_page=per_page)
+    start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
+    end = min(users.page * users.per_page, users.total)
+    return render_template("admin/dashboard.html", users=users, start=start, end=end)
 
 @admin_bp.route('/approve/<int:user_id>')
 def approve_user(user_id):

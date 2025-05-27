@@ -1,0 +1,23 @@
+{% import 'components/macros.html' as components %}
+{% for user in users.items %}
+<tr class="border-t">
+  <td class="px-4 py-4 flex items-center space-x-3">
+    <img src="{{ url_for('static', filename='/images/profile.jpg') }}" class="w-8 h-8 rounded-full" alt="Avatar">
+    <div>
+      <p class="font-medium">{{ user.full_name }}</p>
+      <p class="text-xs text-gray-500">{{ user.email }}</p>
+    </div>
+  </td>
+  <td class="px-4 py-4">{{ user.license_number }}</td>
+  <td class="px-4 py-4">{{ user.registered_at.strftime('%b %d %Y') if user.registered_at else '' }}</td>
+  <td class="px-4 py-4 flex justify-end space-x-2">
+    {{ components.info_button('View') }}
+    <button class="{{ components.button_classes_success() }}">✓ Accept</button>
+    <button class="{{ components.button_classes_danger() }}">✕ Reject</button>
+  </td>
+</tr>
+{% else %}
+<tr>
+  <td colspan="4" class="px-4 py-8 text-center text-gray-400">No users found.</td>
+</tr>
+{% endfor %}

@@ -74,7 +74,8 @@ def complete_application(token):
         user.verification_token_expiry = None
         db.session.commit()
         send_signup_notification_email(user.email)
-        send_welcome_email_to_admin(current_app.config["ADMINS"]["email"], user.email)
+        for admin in current_app.config["ADMINS"]:
+            send_welcome_email_to_admin(admin["email"], user.email)
         flash("Application completed. Awaiting admin approval.", "success")
         return render_template("auth/complete_application.html", form=form, show_modal=True, user_email=user.email)
 
