@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from app.routes.forms import SignupForm, ForgotPasswordForm, ResetPasswordForm, LoginForm, CompleteApplicationForm
 from app.models.user import User, db
 from app.utils.helpers import generate_verification_token, generate_reset_token, verify_reset_token, generate_access_token, verify_verification_token
-from app.utils.email import send_verification_email, send_password_reset_email
+from app.utils.email import send_verification_email, send_password_reset_email, send_signup_notification_email, send_welcome_email_to_admin
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -73,6 +73,8 @@ def complete_application(token):
         user.verification_token = None
         user.verification_token_expiry = None
         db.session.commit()
+        send_signup_notification_email(user.email)
+        send_welcome_email_to_admin(current_app.config["ADMINS"]["email"], user.email)
         flash("Application completed. Awaiting admin approval.", "success")
         return render_template("auth/complete_application.html", form=form, show_modal=True, user_email=user.email)
 
@@ -90,7 +92,7 @@ def login():
     elif session.get('user_id'):
         return redirect(url_for('dashboard.index'))
     
-    
+
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data

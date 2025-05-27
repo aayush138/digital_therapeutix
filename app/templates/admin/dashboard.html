@@ -1,32 +1,152 @@
 {% extends 'base.html' %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <h3>Pending Doctors</h3>
-  {% if users %}
-    <table class="table">
-      <thead>
-        <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
-      </thead>
-      <tbody>
-        {% for user in users %}
-          <tr>
-            <td>{{ user.full_name }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <a href="{{ url_for('admin.approve_user', user_id=user.id) }}" class="btn btn-success btn-sm">Approve</a>
-              <a href="{{ url_for('admin.reject_user', user_id=user.id) }}" class="btn btn-danger btn-sm">Reject</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No pending doctors.</p>
-  {% endif %}
 
-  <form action="{{ url_for('auth.logout') }}" method="post" class="mt-4">
-    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
-  </form>
+<div class="min-h-[94vh] flex">
+  <!-- Sidebar -->
+  <div class="flex flex-col items-center justify-between">
+    <div class="flex flex-col items-center justify-between">
+        <img src="{{ url_for("static", filename="/images/logo.png") }}" class="px-6 py-2" alt="Logo">
+        <aside class="w-[75%] bg-white shadow-md rounded-full flex flex-col items-left justify-between p-8 mt-8">
+      <!-- Nav Items -->
+      <nav class="flex flex-col space-y-8 items-center">
+        <a href="/admin/verify" class="flex flex-col items-center gap-2 group">
+          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
+            <svg class="w-5 h-10 text-green-600" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path d="M12 2L2 7v6c0 5.25 3.75 10 10 13 6.25-3 10-7.75 10-13V7l-10-5z" />
+            </svg>
+          </div>
+          <span class="hidden lg:block text-sm font-medium text-green-800">Verify</span>
+        </a>
+
+        <a href="/admin/users" class="flex flex-col items-center gap-2 group">
+          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
+            <svg class="w-6 h-6 text-green-600 group-hover:text-green-600" fill="currentColor"
+              viewBox="0 0 24 24">
+              <path d="M12 12c2.7 0 8 1.35 8 4v2H4v-2c0-2.65 5.3-4 8-4zm0-2a4 4 0 100-8 4 4 0 000 8z" />
+            </svg>
+          </div>
+          <span class="hidden lg:block text-sm font-medium text-gray-800">All Users</span>
+        </a>
+
+        <a href="/admin/vendors" class="flex flex-col items-center gap-2 group">
+          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
+            <svg class="w-6 h-6 text-green-600 group-hover:text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z" />
+          </svg>
+          </div>
+          <span class="hidden lg:block text-sm font-medium text-center text-gray-800">Vendor<br>Requests</span>
+        </a>
+      </nav>
+        </aside>
+    </div>
+
+    <aside>
+      <!-- User & Logout -->
+      <div class="flex flex-col items-center gap-6">
+        <div class="flex flex-col gap-2">
+          <img src="{{ url_for("static", filename="/images/profile.jpg") }}" class="w-12 h-12 rounded-full border m-auto" alt="Admin">
+          <div>
+            <p class="text-sm font-medium">Juli D.</p>
+            <p class="text-xs text-gray-600">#Admin</p>
+          </div>
+        </div>
+        <a href="/logout" class="flex flex-col items-center gap-2 text-sm text-gray-700 hover:text-red-600">
+          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+            </svg>
+          </div>
+          <span class="hidden lg:block">Log Out</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+
+
+  <!-- Main Content -->
+  <section class="w-full px-6 py-8 min-h-[94vh]">
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">License Verification</h2>
+          <p class="text-sm text-gray-500">View and manage all user license verifications.</p>
+        </div>
+        <div class="relative">
+          <input type="text" placeholder="Search by Name/ License No"
+            class="pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-300 text-sm w-72">
+          <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto rounded-lg">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-green-100 text-gray-700 text-sm font-medium">
+            <tr>
+              <th class="px-4 py-3">User Name</th>
+              <th class="px-4 py-3">License Number</th>
+              <th class="px-4 py-3">Date</th>
+              <th class="px-4 py-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm text-gray-700">
+            <!-- Row Example -->
+            <tr class="border-t">
+              <td class="px-4 py-4 flex items-center space-x-3">
+                <img src="{{ url_for("static", filename="/images/profile.jpg") }}" class="w-8 h-8 rounded-full" alt="Avatar">
+                <div>
+                  <p class="font-medium">Pristia Candra</p>
+                  <p class="text-xs text-gray-500">pristia@gmail.com</p>
+                </div>
+              </td>
+              <td class="px-4 py-4">#LC34UN00</td>
+              <td class="px-4 py-4">Aug 21 2023</td>
+              <td class="px-4 py-4 flex justify-end space-x-2">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-md flex items-center space-x-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>View</span>
+                </button>
+                <button class="bg-green-700 hover:bg-green-800 text-white text-xs px-3 py-1 rounded-md">✓ Accept</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded-md">✕ Reject</button>
+              </td>
+            </tr>
+
+            <!-- Repeat rows for other users -->
+            <!-- ... -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination & Info -->
+      <div class="flex justify-between items-center mt-6 text-sm text-gray-600">
+        <div class="flex items-center space-x-2">
+          <button class="px-2 py-1 border rounded">&lt;</button>
+          <button class="px-2 py-1 border rounded bg-gray-200">1</button>
+          <button class="px-2 py-1 border rounded">2</button>
+          <span>...</span>
+          <button class="px-2 py-1 border rounded">10</button>
+          <button class="px-2 py-1 border rounded">&gt;</button>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span>Showing 1 to 8 of 50 entries</span>
+          <select class="border px-2 py-1 rounded text-sm">
+            <option>Show 8</option>
+            <option>Show 16</option>
+            <option>Show 24</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 {% endblock %}
