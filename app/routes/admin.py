@@ -17,8 +17,21 @@ def dashboard():
     users = User.query.filter_by(is_email_verified=True, is_license_verified=False).order_by(User.registered_at.desc()).paginate(page=page, per_page=per_page)
     start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
     end = min(users.page * users.per_page, users.total)
-    return render_template("admin/dashboard.html", users=users, start=start, end=end)
+    return render_template("admin/dashboard.html", users=users, start=start, end=end, user_template="admin/verify.html")
 
+@admin_bp.route('/users')
+def all_users():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 8, type=int)
+    users = User.query.filter_by(is_email_verified=True, is_license_verified=True)\
+        .order_by(User.registered_at.desc())\
+        .paginate(page=page, per_page=per_page)
+    start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
+    end = min(users.page * users.per_page, users.total)
+    return render_template("admin/dashboard.html", users=users, start=start, end=end, user_template="admin/user.html")
+
+
+# User Licence Verification
 @admin_bp.route('/approve/<int:user_id>', methods=['POST'])
 def approve_user(user_id):
     user = User.query.get(user_id)
@@ -39,13 +52,14 @@ def reject_user(user_id):
         flash("User rejected successfully!", "danger")
     return redirect(url_for('admin.dashboard'))
 
-
+# User Details
 @admin_bp.route('/user/<int:user_id>/details')
 def user_details(user_id):
     user = User.query.get_or_404(user_id)
-    # Adjust fields as needed
     return jsonify({
         # Basis Details
+        "id": user.id,
+        "is_blocked": user.is_blocked,
         "full_name": user.full_name,
         "preferred_name": user.preferred_name,
         "email": user.email,
@@ -72,3 +86,21 @@ def user_details(user_id):
         "subspecialty": user.subspecialty,
         "current_employer": user.current_employer,
     })
+
+
+# Block/Unblock User
+@admin_bp.route('/block/<int:user_id>', methods=['POST'])
+def block_user(user_id):
+    user = User.query.get_or_404(user_id)
+    user.is_blocked = True
+    db.session.commit()
+    flash("User blocked.", "danger")
+    return redirect(url_for('admin.all_users'))
+
+@admin_bp.route('/unblock/<int:user_id>', methods=['POST'])
+def unblock_user(user_id):
+    user = User.query.get_or_404(user_id)
+    user.is_blocked = False
+    db.session.commit()
+    flash("User unblocked.", "success")
+    return redirect(url_for('admin.all_users'))

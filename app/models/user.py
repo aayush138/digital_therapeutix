@@ -15,6 +15,7 @@ class User(db.Model):
 
     is_email_verified = db.Column(db.Boolean, default=False)
     is_license_verified = db.Column(db.Boolean, default=False)  # admin approves
+    is_blocked = db.Column(db.Boolean, default=False)
 
     # Step 2: Application details
     preferred_name = db.Column(db.String(120), nullable=True)

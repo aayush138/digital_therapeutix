@@ -128,6 +128,10 @@ def login():
         if not user.is_license_verified:
             flash("Your license is under review. Please wait for admin approval.", "warning")
             return render_template("auth/login.html", form=form)
+        
+        if user.is_blocked:
+            flash("Your account is blocked. Please contact support.", "danger")
+            return render_template("auth/login.html", form=form)
 
         # Valid doctor login
         session.permanent = remember_me
