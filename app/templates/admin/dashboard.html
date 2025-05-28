@@ -40,7 +40,7 @@
             <p class="text-sm text-gray-500">View and manage all user license verifications.</p>
           </div>
           <div class="relative">
-            <input type="text" placeholder="Search by Name/ License No"
+            <input id="user-search" type="text" placeholder="Search by Name/ License No"
               class="pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-300 text-sm w-72">
             <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
               viewBox="0 0 24 24">
@@ -59,7 +59,7 @@
                 <th class="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody class="text-sm text-gray-700">
+            <tbody id="user-table-body" class="text-sm text-gray-700">
               {% include user_template %}
             </tbody>
           </table>
@@ -102,4 +102,26 @@
       </div>
     </section>
   </div>
+
+  <!-- Search Script -->
+  <script>
+    const searchInput = document.getElementById('user-search');
+    const tableBody = document.getElementById('user-table-body');
+    let searchTimeout = null;
+
+    // Set this variable based on the page context
+    const isVerified = "{{ 'true' if active_page == 'users' else 'false' }}";
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const q = searchInput.value.trim();
+        fetch(`/admin/search/users?q=${encodeURIComponent(q)}&verified=${isVerified}`)
+          .then(res => res.json())
+          .then(data => {
+            tableBody.innerHTML = data.rows;
+          });
+      }, 300);
+    });
+  </script>
 {% endblock %}

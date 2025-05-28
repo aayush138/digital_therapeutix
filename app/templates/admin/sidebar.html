@@ -4,30 +4,37 @@
     <aside class="w-[75%] bg-white shadow-md rounded-full flex flex-col items-left justify-between p-8 mt-8">
       <nav class="flex flex-col space-y-8 items-center">
         <a href="/admin/dashboard" class="flex flex-col items-center gap-2 group">
-          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
-            <svg class="w-5 h-10 text-green-600" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
+          <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100{% if active_page == 'verify' %} bg-green-100{% else %} bg-white{% endif %}">
+            <svg class="w-5 h-10 transition group-hover:text-green-700{% if active_page == 'verify' %} text-green-700{% else %} text-green-600{% endif %}"
+              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M12 2L2 7v6c0 5.25 3.75 10 10 13 6.25-3 10-7.75 10-13V7l-10-5z" />
             </svg>
           </div>
-          <span class="hidden lg:block text-sm font-medium text-green-800">Verify</span>
+          <span class="hidden lg:block text-sm font-medium transition group-hover:text-green-700{% if active_page == 'verify' %} text-green-700{% else %} text-green-800{% endif %}">
+            Verify
+          </span>
         </a>
         <a href="/admin/users" class="flex flex-col items-center gap-2 group">
-          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
-            <svg class="w-6 h-6 text-green-600 group-hover:text-green-600" fill="currentColor"
-              viewBox="0 0 24 24">
+          <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100{% if active_page == 'users' %} bg-green-100{% else %} bg-white{% endif %}">
+            <svg class="w-6 h-6 transition group-hover:text-green-700{% if active_page == 'users' %} text-green-700{% else %} text-green-600{% endif %}"
+              fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.7 0 8 1.35 8 4v2H4v-2c0-2.65 5.3-4 8-4zm0-2a4 4 0 100-8 4 4 0 000 8z" />
             </svg>
           </div>
-          <span class="hidden lg:block text-sm font-medium text-gray-800">All Users</span>
+          <span class="hidden lg:block text-sm font-medium transition group-hover:text-green-700{% if active_page == 'users' %} text-green-700{% else %} text-gray-800{% endif %}">
+            All Users
+          </span>
         </a>
         <a href="/admin/vendors" class="flex flex-col items-center gap-2 group">
-          <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
-            <svg class="w-6 h-6 text-green-600 group-hover:text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100{% if active_page == 'vendors' %} bg-green-100{% else %} bg-white{% endif %}">
+            <svg class="w-6 h-6 transition group-hover:text-green-700{% if active_page == 'vendors' %} text-green-700{% else %} text-green-600{% endif %}"
+              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z" />
             </svg>
           </div>
-          <span class="hidden lg:block text-sm font-medium text-center text-gray-800">Vendor<br>Requests</span>
+          <span class="hidden lg:block text-sm font-medium text-center transition group-hover:text-green-700{% if active_page == 'vendors' %} text-green-700{% else %} text-gray-800{% endif %}">
+            Vendor<br>Requests
+          </span>
         </a>
       </nav>
     </aside>
@@ -37,8 +44,8 @@
       <div class="flex flex-col gap-2">
         <img src="{{ url_for('static', filename='/images/profile.jpg') }}" class="w-12 h-12 rounded-full border m-auto" alt="Admin">
         <div>
-          <p class="text-sm font-medium">Juli D.</p>
-          <p class="text-xs text-gray-600">#Admin</p>
+          <p class="text-sm text-center font-medium">{{ admin_user }}</p>
+          <p class="text-xs text-center text-gray-600">#Admin</p>
         </div>
       </div>
       <a href="/auth/logout" class="flex flex-col items-center gap-2 text-sm text-gray-700 hover:text-red-600">

@@ -19,13 +19,9 @@
         <span>View</span>
     </button>
     {% if user.is_blocked %}
-      <form action="{{ url_for('admin.unblock_user', user_id=user.id) }}" method="post" style="display:inline;">
-        <button type="submit" class="{{ components.button_classes_success() }}">✓ Unblock</button>
-      </form>
+      <button type="button" class="{{ components.button_classes_success() }} trigger-confirm" data-action="unblock" data-user-id="{{ user.id }}" data-user-email="{{ user.email }}">✓ Unblock</button>
     {% else %}
-      <form action="{{ url_for('admin.block_user', user_id=user.id) }}" method="post" style="display:inline;">
-        <button type="submit" class="{{ components.button_classes_danger() }}">✕ Block</button>
-      </form>
+      <button type="button" class="{{ components.button_classes_danger() }} trigger-confirm" data-action="block" data-user-id="{{ user.id }}" data-user-email="{{ user.email }}">✕ Block</button>
     {% endif %}
   </td>
 </tr>
@@ -38,7 +34,7 @@
 
 
 <!-- Modal Overlay + Panel -->
-<div id="userDetailsModal" class="fixed flex justify-end inset-0 z-50 hidden items-center bg-black bg-opacity-40 transition-opacity duration-300">
+<div id="userDetailsModal" class="fixed flex justify-end inset-0 z-30 hidden items-center bg-black bg-opacity-40 transition-opacity duration-300">
   <div
     id="userPanel"
     class="bg-white rounded-l-xl shadow-xl w-full max-w-4xl p-6 space-y-4 h-screen overflow-y-auto transform translate-x-full transition-transform duration-300 relative right-0">
@@ -58,6 +54,20 @@
         <span class="text-gray-400">Loading...</span>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- Confirmation Check Modal -->
+<div id="confirmModal" class="fixed flex inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-40">
+  <div class="bg-white rounded-xl shadow-xl p-8 max-w-sm w-full text-center">
+    <h2 id="confirmText" class="text-3xl font-bold mb-4"></h2>
+    <p id="confirmEmail" class="text-green-700 text-base mb-2"></p>
+    <p id="confirmNote" class="text-gray-500 text-sm mb-4"></p>
+    <form id="confirmForm" method="post">
+      <button type="button" id="cancelConfirm" class="px-4 py-2 text-green-700 hover:underline text-l font-medium">Back</button>
+      <button type="submit" id="confirmBtn" class="px-4 py-2 rounded text-white">Confirm</button>
+    </form>
   </div>
 </div>
 
@@ -135,12 +145,8 @@
               <button id="backBtn" class="text-green-700 hover:underline text-l font-medium">Back</button>
               <div class="space-x-2">
                 ${data.is_blocked
-                  ? `<form action="/admin/unblock/${data.id}" method="post" style="display:inline;">
-                        <button type="submit" class="{{ components.button_classes_success() }}">✓ Unblock</button>
-                    </form>`
-                  : `<form action="/admin/block/${data.id}" method="post" style="display:inline;">
-                        <button type="submit" class="{{ components.button_classes_danger() }}">✕ Block</button>
-                    </form>`
+                  ? `<button type="button" class="bg-green-700 hover:bg-green-700 text-white text-xs px-4 py-3 rounded-2xl trigger-confirm" data-action="unblock" data-user-id="${data.id}" data-user-email="${data.email}">✓ Unblock</button>`
+                  : `<button type="button" class="bg-red-600 hover:bg-red-500 text-white text-xs px-4 py-3 rounded-2xl trigger-confirm" data-action="block" data-user-id="${data.id}" data-user-email="${data.email}">✕ Block</button>`
                 }
               </div>
             </div>
@@ -162,5 +168,54 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
+  });
+</script>
+
+
+<script>
+  // Confirmation modal logic
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmEmail = document.getElementById('confirmEmail');
+  const confirmNote = document.getElementById('confirmNote');
+  const confirmForm = document.getElementById('confirmForm');
+  const cancelConfirm = document.getElementById('cancelConfirm');
+  const confirmBtn = document.getElementById('confirmBtn');
+
+  // Attach event listener to the whole document for all .trigger-confirm buttons (including dynamic)
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.trigger-confirm');
+    if (btn) {
+      const action = btn.getAttribute('data-action');
+      const userId = btn.getAttribute('data-user-id');
+      const userEmail = btn.getAttribute('data-user-email');
+      if (action === 'block') {
+        confirmText.textContent = `Are you sure you want to block this user?`;
+        confirmEmail.textContent = `${userEmail}`;
+        confirmNote.textContent = "Once blocked, this user will no longer be able to access the portal. To unblock them, you must manually do it from the admin dashboard.";
+        confirmForm.action = `/admin/block/${userId}`;
+        confirmBtn.textContent = "✕ Block";
+        confirmBtn.className = "bg-red-600 hover:bg-red-500 text-white text-xs px-4 py-3 rounded-2xl";
+      } else {
+        confirmText.textContent = `Are you sure you want to unblock this user?`;
+        confirmEmail.textContent = `${userEmail}`;
+        confirmNote.textContent = "This will restore access to the portal for this user.";
+        confirmForm.action = `/admin/unblock/${userId}`;
+        confirmBtn.textContent = "✓ Unblock";
+        confirmBtn.className = "bg-green-700 hover:bg-green-700 text-white text-xs px-4 py-3 rounded-2xl";
+      }
+      confirmModal.classList.remove('hidden');
+    }
+  });
+
+  cancelConfirm.onclick = function() {
+    confirmModal.classList.add('hidden');
+  };
+
+  // Optional: close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (!confirmModal.classList.contains('hidden') && e.key === 'Escape') {
+      confirmModal.classList.add('hidden');
+    }
   });
 </script>

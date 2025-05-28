@@ -1,14 +1,15 @@
-from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify, g, current_app
 from app.models.user import User, db
 from app.utils.email import send_application_approval_email, send_application_rejection_email
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin_bp.before_request
-def restrict_to_admin():
+def admin_before_request():
     if not session.get('is_admin'):
         flash("Admin access only.", "danger")
         return redirect(url_for('auth.login'))
+    g.admin_user = session.get('admin_name', 'Admin')
 
 @admin_bp.route('/dashboard')
 def dashboard():
@@ -17,7 +18,7 @@ def dashboard():
     users = User.query.filter_by(is_email_verified=True, is_license_verified=False).order_by(User.registered_at.desc()).paginate(page=page, per_page=per_page)
     start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
     end = min(users.page * users.per_page, users.total)
-    return render_template("admin/dashboard.html", users=users, start=start, end=end, user_template="admin/verify.html")
+    return render_template("admin/dashboard.html", users=users,admin_user=g.admin_user, start=start, end=end, active_page='verify', user_template="admin/verify.html")
 
 @admin_bp.route('/users')
 def all_users():
@@ -28,7 +29,7 @@ def all_users():
         .paginate(page=page, per_page=per_page)
     start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
     end = min(users.page * users.per_page, users.total)
-    return render_template("admin/dashboard.html", users=users, start=start, end=end, user_template="admin/user.html")
+    return render_template("admin/dashboard.html", users=users, start=start, end=end, active_page='users', user_template="admin/user.html")
 
 
 # User Licence Verification
@@ -86,6 +87,24 @@ def user_details(user_id):
         "subspecialty": user.subspecialty,
         "current_employer": user.current_employer,
     })
+
+@admin_bp.route('/search/users')
+def search_users():
+    q = request.args.get('q', '', type=str)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 8, type=int)
+    verified = request.args.get('verified', 'false') == 'true'
+    query = User.query.filter(
+        User.is_email_verified == True,
+        User.is_license_verified == verified,
+        (User.full_name.ilike(f"%{q}%")) | (User.license_number.ilike(f"%{q}%"))
+    ).order_by(User.registered_at.desc())
+    users = query.paginate(page=page, per_page=per_page)
+    # Choose the correct partial
+    partial = "admin/user.html" if verified else "admin/verify.html"
+    rows = render_template(partial, users=users)
+    return jsonify({'rows': rows})
+
 
 
 # Block/Unblock User
