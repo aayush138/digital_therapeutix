@@ -18,7 +18,7 @@ def dashboard():
     users = User.query.filter_by(is_email_verified=True, is_license_verified=False).order_by(User.registered_at.desc()).paginate(page=page, per_page=per_page)
     start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
     end = min(users.page * users.per_page, users.total)
-    return render_template("admin/dashboard.html", users=users,admin_user=g.admin_user, start=start, end=end, active_page='verify', user_template="admin/verify.html")
+    return render_template("admin/dashboard.html", users=users, admin_user=g.admin_user, start=start, end=end, active_page='verify', user_template="admin/verify.html")
 
 @admin_bp.route('/users')
 def all_users():
@@ -29,7 +29,7 @@ def all_users():
         .paginate(page=page, per_page=per_page)
     start = (users.page - 1) * users.per_page + 1 if users.total > 0 else 0
     end = min(users.page * users.per_page, users.total)
-    return render_template("admin/dashboard.html", users=users, start=start, end=end, active_page='users', user_template="admin/user.html")
+    return render_template("admin/dashboard.html", users=users, start=start, end=end, admin_user=g.admin_user, active_page='users', user_template="admin/user.html")
 
 
 # User Licence Verification
