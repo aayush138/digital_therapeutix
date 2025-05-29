@@ -80,7 +80,7 @@ MAIL_DEFAULT_SENDER=your-email@gmail.com
 python run.py
 ```
 
-Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser.
+Visit [http://127.0.0.1:5000/auth/login](http://127.0.0.1:5000/auth/login) in your browser.
 
 ## Database Initialization
 
