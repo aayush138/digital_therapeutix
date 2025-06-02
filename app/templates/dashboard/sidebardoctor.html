@@ -1,0 +1,65 @@
+<div class="flex flex-col items-center justify-between">
+  <div class="flex flex-col items-center justify-between">
+    <img src="{{ url_for('static', filename='/images/logo.png') }}" class="px-6 py-2" alt="Logo">
+    <aside class="w-[75%] bg-white shadow-md rounded-full flex flex-col items-left justify-between p-8 mt-8">
+      <nav class="flex flex-col space-y-8 items-center">
+        <a href="/dashboard" class="flex flex-col items-center gap-2 group">
+          <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100{% if active_page == 'home' %} bg-green-100{% else %} bg-white{% endif %}">
+            <svg class="w-5 h-10 transition group-hover:text-green-700{% if active_page == 'home' %} text-green-700{% else %} text-green-600{% endif %}"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
+            </svg>
+          </div>
+          <span class="hidden lg:block text-sm font-medium transition group-hover:text-green-700{% if active_page == 'home' %} text-green-700{% else %} text-green-800{% endif %}">
+            Home
+          </span>
+        </a>
+        <a href="/dashboard/cases" class="flex flex-col items-center gap-2 group">
+          <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100{% if active_page == 'cases' %} bg-green-100{% else %} bg-white{% endif %}">
+            <svg class="w-5 h-10 transition group-hover:text-green-700{% if active_page == 'cases' %} text-green-700{% else %} text-green-600{% endif %}"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 21 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.54166 11.4587C7.54166 11.1135 7.82149 10.8337 8.16666 10.8337H13.1667C13.5118 10.8337 13.7917 11.1135 13.7917 11.4587C13.7917 11.8038 13.5118 12.0837 13.1667 12.0837H8.16666C7.82149 12.0837 7.54166 11.8038 7.54166 11.4587Z" fill="#13193A"/>
+              <path d="M8.16666 7.91699C7.82149 7.91699 7.54166 8.19682 7.54166 8.54199C7.54166 8.88717 7.82149 9.16699 8.16666 9.16699H10.25C10.5952 9.16699 10.875 8.88717 10.875 8.54199C10.875 8.19682 10.5952 7.91699 10.25 7.91699H8.16666Z" fill="#13193A"/>
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M14.5188 2.29343C16.4278 2.34729 17.9587 3.91169 17.9587 5.83366V11.0566C17.9587 11.086 17.9586 11.1153 17.9583 11.1446V15.417C17.9583 17.373 16.3727 18.9587 14.4167 18.9587H6.5C4.88497 18.9587 3.5561 17.7335 3.39203 16.1619C2.58798 15.6623 2.1922 14.6132 2.61918 13.6525C3.11777 12.5307 3.37538 11.3167 3.37538 10.0891V5.83366C3.37538 3.91195 4.90592 2.34771 6.81451 2.29345C7.07149 1.56444 7.7664 1.04199 8.58333 1.04199H12.75C13.5669 1.04199 14.2618 1.56443 14.5188 2.29343ZM6.8158 3.54419C5.59713 3.59717 4.62538 4.60193 4.62538 5.83366V10.0891C4.62538 11.4916 4.33106 12.8785 3.76145 14.1602C3.54229 14.6533 3.90324 15.2087 4.44284 15.2087H13.6859C15.0374 15.2087 16.2076 14.27 16.5008 12.9507C16.633 12.3556 16.7026 11.7483 16.7083 11.1389L16.7087 5.83366C16.7087 4.60168 15.7366 3.59675 14.5175 3.54416C14.2595 4.27127 13.5656 4.79199 12.75 4.79199H8.58333C7.76777 4.79199 7.07382 4.27129 6.8158 3.54419ZM7.95833 2.91699C7.95833 2.57181 8.23815 2.29199 8.58333 2.29199H12.75C13.0952 2.29199 13.375 2.57181 13.375 2.91699C13.375 3.26217 13.0952 3.54199 12.75 3.54199H8.58333C8.23815 3.54199 7.95833 3.26217 7.95833 2.91699ZM13.6859 16.4587C14.8644 16.4587 15.9467 15.9608 16.7083 15.1451V15.417C16.7083 16.6826 15.6823 17.7087 14.4167 17.7087H6.5C5.68361 17.7087 4.98909 17.1869 4.73169 16.4587H13.6859Z"/>
+            </svg>
+          </div>
+          <span class="hidden lg:block text-sm font-medium transition group-hover:text-green-700{% if active_page == 'cases' %} text-green-700{% else %} text-gray-800{% endif %}">
+            Cases
+          </span>
+        </a>
+        <a href="/dashboard/help" class="flex flex-col items-center gap-2 group">
+          <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100{% if active_page == 'help' %} bg-green-100{% else %} bg-white{% endif %}">
+            <svg class="w-6 h-6 transition group-hover:text-green-700{% if active_page == 'help' %} text-green-700{% else %} text-green-600{% endif %}"
+                fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 115.82 1c-.28.54-.77 1-1.41 1.41C12.5 12 12 12.5 12 13m0 4h.01"/>
+            </svg>
+          </div>
+          <span class="hidden lg:block text-sm font-medium text-center transition group-hover:text-green-700{% if active_page == 'help' %} text-green-700{% else %} text-gray-800{% endif %}">
+            Help
+          </span>
+        </a>
+      </nav>
+    </aside>
+  </div>
+  <aside>
+    <div class="flex flex-col items-center gap-6">
+      <div class="flex flex-col gap-2">
+        <img src="{{ url_for('static', filename='/images/profile.jpg') }}" class="w-12 h-12 rounded-full border m-auto" alt="Admin">
+        <div>
+          <p class="text-sm text-center font-medium">{{ doctor_name }}</p>
+          <p class="text-xs text-center text-gray-600">{{ license_number }}</p>
+        </div>
+      </div>
+      <a href="/auth/logout" class="flex flex-col items-center gap-2 text-sm text-gray-700 hover:text-red-600">
+        <div class="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center group-hover:bg-green-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+          </svg>
+        </div>
+        <span class="hidden lg:block">Log Out</span>
+      </a>
+    </div>
+  </aside>
+</div>

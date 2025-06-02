@@ -38,3 +38,7 @@ h1, h2, h3, h4, h5, h6,
 input[type="checkbox"] {
   accent-color: var(--primary-color);
 }
+
+input[type="radio"]:checked {
+  accent-color: var(--primary-color);
+}

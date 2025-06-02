@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-2">
+        {% for category, message in messages %}
+          <div class="px-4 py-3 rounded shadow-lg text-white
+            {% if category == 'success' %}bg-green-600{% elif category == 'danger' %}bg-red-600{% elif category == 'warning' %}bg-yellow-500{% else %}bg-gray-800{% endif %} animate-fade-in"
+          >
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        setTimeout(function() {
+          var toast = document.getElementById('toast-container');
+          if (toast) toast.style.display = 'none';
+        }, 10000);
+      </script>
+      <style>
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px);}
+          to { opacity: 1; transform: translateY(0);}
+        }
+        .animate-fade-in { animation: fade-in 0.4s;}
+      </style>
+    {% endif %}
+  {% endwith %}
+
+  <div class="min-h-[94vh] flex">
+    {% include 'dashboard/sidebardoctor.html' %}
+    <section class="w-full px-6 py-4 min-h-[94vh]">
+      <div class="bg-white rounded-xl shadow-md p-6">
+
+        <div class="grid grid-cols-2 grid-rows-1 gap-4">
+          <div>
+            <h2 class="text-4xl font-semibold text-gray-800 mb-4">Welcome to QUINT by Digital Therapeutix</h2>
+            <p class="text-sm text-gray-500">Unlock precision phage therapy with QUINT, your trusted platform for rapid bacterial analysis and phage matching. Upload your FASTA file to identify bacterial profiles and discover tailored phage solutions in minutes.</p>
+
+            <img src="{{ url_for('static', filename='images/doctorhome.png') }}" alt="Green DNA" class="mt-8 object-cover w-full h-[544px] rounded-3xl" />
+          </div>
+
+          <div>
+            <div class="max-w-xl mx-auto p-6 space-y-6 font-sans text-gray-800">
+              <!-- Stepper -->
+              <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold">Submit Your Case for Analysis</h2>
+                <p class="text-sm text-gray-500">STEP 1 OF 3</p>
+              </div>
+
+              <div class="flex justify-between items-center space-x-8 text-sm font-medium text-gray-700">
+                <!-- Step 1 -->
+                <div class="flex items-center space-x-2">
+                  <div class="w-6 h-6 flex items-center justify-center rounded-full bg-green-700 text-white text-xs">1</div>
+                  <span class="text-gray-800 font-medium">Upload Your<br>FASTA File</span>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="flex items-center space-x-2">
+                  <div class="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-xs">2</div>
+                  <span>Get Recommended<br>Phage Therapy</span>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="flex items-center space-x-2">
+                  <div class="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 text-xs">3</div>
+                  <span>Select & Request<br>Vendors</span>
+                </div>
+              </div>
+
+              <!-- Upload Card -->
+              <div id="upload-area"
+                  class="border border-dashed border-gray-300 rounded-lg p-6 text-center bg-white shadow relative transition"
+                  style="cursor:pointer;">
+                <input id="file-input" type="file" accept=".fasta,.fa" class="hidden" />
+                <img src="{{ url_for('static', filename='images/upload.png') }}" alt="Upload Icon" class="mx-auto mb-4 w-16 h-16" />
+                <p class="text-lg font-medium mb-2">Drag & Drop here to Upload Your FASTA File</p>
+                <p class="text-sm text-gray-500 mb-4">
+                  Only FASTA files (.fasta, .fa) are accepted. Files should contain a single bacterial sequence for best results. Maximum file size: 10MB.
+                </p>
+                <button id="upload-btn" type="button"
+                  class="bg-transparent text-green-700 text-center border border-green-700 py-4 px-4 rounded-2xl hover:bg-green-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-700 transition">
+                  ↑ Upload File
+                </button>
+                <div id="upload-error" class="mt-2 text-red-600 text-sm"></div>
+                <div id="file-name" class="mt-2 text-green-700 font-medium"></div>
+                
+              </div>
+
+              <!-- AI Model Selection -->
+              <div>
+                <p class="text-sm font-medium text-gray-700 mb-2">Choose your AI Model</p>
+                <div class="flex items-center space-x-6">
+                  <label class="flex items-center space-x-2">
+                    <input type="radio" name="model" class="form-radio text-green-700" checked>
+                    <span class="text-sm font-medium">QUINT</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-gray-400">
+                    <input type="radio" name="model" disabled>
+                    <span class="text-sm font-medium">QUINT-X (Not Available Yet)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              <div>
+                <p class="text-sm font-medium text-gray-700 mb-2">Additional Notes for Phage Therapy Upload</p>
+                <textarea
+                  class="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-700"
+                  rows="3"
+                  placeholder="Enter any specific details or requirements for your phage therapy analysis... Example: 'Sample collected from patient X, suspected E. coli infection, urgent processing requested.'"
+                ></textarea>
+              </div>
+
+              <!-- Final Submit -->
+              <div class="text-right">
+                <button id="submit-analysis" class="bg-green-700 hover:bg-green-700 text-white text-base px-4 py-4 rounded-2xl">
+                  Submit for Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadBtn = document.getElementById('upload-btn');
+      const fileInput = document.getElementById('file-input');
+      const uploadArea = document.getElementById('upload-area');
+      const fileNameDiv = document.getElementById('file-name');
+      const errorDiv = document.getElementById('upload-error');
+      let uploadedFastaFile = null;
+
+      // Open file picker on button or area click
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      uploadArea.addEventListener('click', (e) => {
+        if (e.target === uploadArea || e.target === fileNameDiv) fileInput.click();
+      });
+
+      // Drag & drop events
+      uploadArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadArea.classList.add('ring-2', 'ring-green-700');
+      });
+      uploadArea.addEventListener('dragleave', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('ring-2', 'ring-green-700');
+      });
+      uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('ring-2', 'ring-green-700');
+        if (e.dataTransfer.files.length) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      // File input change
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+          handleFile(fileInput.files[0]);
+        }
+      });
+
+      // Handle file: store in variable, show name
+      function handleFile(file) {
+        errorDiv.textContent = ''; // Clear previous errors
+        if (!file.name.match(/\.(fasta|fa)$/i)) {
+          errorDiv.textContent = 'Only FASTA files (.fasta, .fa) are accepted.';
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          errorDiv.textContent = 'File size exceeds 10MB.';
+          return;
+        }
+        uploadedFastaFile = file;
+        fileNameDiv.textContent = `Selected: ${file.name}`;
+      }
+
+      // Submit for analysis
+      document.getElementById('submit-analysis').addEventListener('click', function() {
+        if (!uploadedFastaFile) {
+          alert('Please upload a FASTA file first.');
+          return;
+        }
+        const notes = document.querySelector('textarea').value;
+        const model = document.querySelector('input[name="model"]:checked')?.value || 'QUINT';
+
+        const formData = new FormData();
+        formData.append('fasta', uploadedFastaFile);
+        formData.append('notes', notes);
+        formData.append('model', model);
+
+        fetch('/dashboard/analyze', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            alert('Analysis submitted!');
+            // Optionally reset the UI
+            uploadedFastaFile = null;
+            fileInput.value = '';
+            fileNameDiv.textContent = '';
+          } else {
+            alert('There was a problem submitting your analysis.');
+          }
+        })
+        .catch(() => alert('Error submitting for analysis.'));
+      });
+    });
+</script>
+
+
+{% endblock %}

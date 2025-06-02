@@ -91,7 +91,7 @@ def login():
     if session.get('is_admin'):
         return redirect(url_for('admin.dashboard'))
     elif session.get('user_id'):
-        return redirect(url_for('dashboard.index'))
+        return redirect(url_for('dashboard.home'))
     
 
     form = LoginForm()
@@ -139,10 +139,12 @@ def login():
         session['jwt_token'] = token
         session['user_id'] = user.id
         session['user_email'] = user.email
+        session['doctor_name'] = user.full_name
+        session['license_number'] = user.license_number
         session['is_admin'] = False
 
         flash("Logged in successfully!", "success")
-        return redirect(url_for("dashboard.index"))
+        return redirect(url_for("dashboard.home"))
 
     return render_template("auth/login.html", form=form)
 

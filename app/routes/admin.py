@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify, g, current_app
 from app.models.user import User, db
-from app.utils.email import send_application_approval_email, send_application_rejection_email
+from app.utils.email import send_application_approval_email, send_application_rejection_email, send_account_unblocked_email, send_account_blocked_email
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -113,6 +113,7 @@ def block_user(user_id):
     user = User.query.get_or_404(user_id)
     user.is_blocked = True
     db.session.commit()
+    send_account_blocked_email(user.email)
     flash("User blocked.", "danger")
     return redirect(url_for('admin.all_users'))
 
@@ -121,5 +122,6 @@ def unblock_user(user_id):
     user = User.query.get_or_404(user_id)
     user.is_blocked = False
     db.session.commit()
+    send_account_unblocked_email(user.email)
     flash("User unblocked.", "success")
     return redirect(url_for('admin.all_users'))

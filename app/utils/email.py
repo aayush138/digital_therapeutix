@@ -79,4 +79,31 @@ def send_application_rejection_email(user_email):
     """
     
     msg = Message(subject=subject, recipients=[user_email], html=html_body)
-    mail.send(msg)            
+    mail.send(msg)     
+
+
+# Send a notification email to the user about account blocking
+def send_account_blocked_email(user_email):
+    subject = "Account Blocked - Digital Therapeutix"
+    html_body = """
+    <h3>Account Blocked</h3>
+    <p>Your account has been blocked due to suspicious activity. Please contact support for further assistance.</p>
+    """
+    
+    msg = Message(subject=subject, recipients=[user_email], html=html_body)
+    mail.send(msg)
+
+
+# Send a notification email to the user about account unblocking
+def send_account_unblocked_email(user_email):
+    subject = "Account Unblocked - Digital Therapeutix"
+    html_body = """
+    <h3>Account Unblocked</h3>
+    <p>Your account has been unblocked. You can now log in to your account.</p>
+    """
+    
+    msg = Message(subject=subject, recipients=[user_email], html=html_body)
+    mail.send(msg)
+
+
+
