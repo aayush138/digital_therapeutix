@@ -1,7 +1,10 @@
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
+
 load_dotenv()
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -26,6 +29,10 @@ class Config:
             "password": os.environ.get("ADMIN_1_PASSWORD"),
         },
     ]
+
+    # PDF report save directory (relative to the project root)
+    PDF_REPORT_PATH = os.path.join(basedir, 'static', 'pdf_reports')
+
 
 
 

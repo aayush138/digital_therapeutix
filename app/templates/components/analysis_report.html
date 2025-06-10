@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+
+<!-- Backend Integration Pending -->
+<div class="h-[94vh] flex flex-col justify-center bg-white p-8 text-base text-gray-800 w-[700px] mx-auto rounded-3xl shadow-lg">
+  <!-- Header -->
+  <div class="flex justify-between text-sm text-gray-500 mb-2">
+    <span>{{ report.date }}</span>
+    <span>Case ID: #{{ report.case_id }}</span>
+  </div>
+
+  <!-- Branding -->
+  <div class="text-center mb-6">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DTPx Logo" class="h-8 mx-auto mb-1">
+    <h2 class="text-xl font-semibold text-gray-800">Quint Analysis Report</h2>
+    <p class="text-base text-gray-700">Digital Therapeutix, Inc.</p>
+    <a href="mailto:support@digitaltherapeutix.com" class="text-green-700 text-sm">support@digitaltherapeutix.com</a>
+  </div>
+
+  <!-- Uploaded Scan Data -->
+  <div class="border rounded-lg p-4 mb-6">
+    <h3 class="text-base font-medium text-green-700 mb-3">Uploaded Scan Data</h3>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <div><strong>Uploaded File Name:</strong> {{ report.file_name }}</div>
+      <div><strong>Severity:</strong> {{ report.severity }}</div>
+      <div><strong>Specimen Number:</strong> {{ report.specimen_number }}</div>
+      <div><strong>Genome Length:</strong> {{ report.genome_length }}</div>
+      <div><strong>Name:</strong> {{ report.name }}</div>
+      <div><strong>GC Content:</strong> {{ report.gc_content }}</div>
+      <div><strong>Resistance:</strong> {{ report.resistance }}</div>
+      <div class="col-span-2">
+        <strong>Background:</strong>
+        {{ report.background }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Status -->
+  <div class="border rounded-lg p-4 mb-6">
+    <h3 class="text-base font-medium text-green-700 mb-3">Match Status & Result</h3>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <div><strong>Most Effective Phage:</strong> {{ report.best_phage }}</div>
+      <div><strong>Average Match Effectiveness:</strong> {{ report.match_effectiveness }}</div>
+      <div><strong>Phages with 100% Match:</strong> {{ report.match_count }}</div>
+      <div><strong>Partial Matches:</strong> {{ report.partial_matches }}</div>
+    </div>
+  </div>
+
+  <!-- Note -->
+  <p class="text-xs text-gray-800 mb-6">
+    NOTE: For vendor requests, contact: 
+    <span class="text-green-700 font-medium">{{ report.support_phone }}</span>
+    or email 
+    <a class="text-green-700 underline" href="mailto:{{ report.support_email }}">{{ report.support_email }}</a>
+  </p>
+
+  <!-- Footer Buttons -->
+  <div class="flex justify-between items-center">
+    <a href="{{ url_for('dashboard.home') }}" class="text-green-700 hover:underline">Back</a>
+    <a href="{{ url_for('dashboard.download_pdf', report_id=report.case_id) }}"
+       class="bg-green-700 hover:bg-green-700 text-white text-sm px-4 py-3 rounded-2xl flex items-center gap-2 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M7 10l5 5 5-5"/>
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 4v12"/>
+        </svg>
+      Download
+    </a>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,5 +1,13 @@
-from flask import Blueprint, render_template, session, redirect, url_for, flash, g, request, jsonify
-from app.models.user import User
+from flask import Blueprint, render_template, session, redirect, url_for, flash, g, request, jsonify, make_response, send_file
+from app.models.user import User, SavedReport, db
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from io import BytesIO
+from datetime import datetime, timezone
+import os
+
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -15,6 +23,40 @@ def restrict_blocked_user():
         g.doctor_user = session.get('doctor_name', 'Doctor')
         g.license_number = session.get('license_number', '#000000')
 
+
+@dashboard_bp.route('/user/details')
+def user_details():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    return jsonify({
+        'id': user.id,
+        'full_name': user.full_name,
+        'preferred_name': user.preferred_name,
+        'email': user.email,
+        'backup_email': user.backup_email,
+        'phone_number': user.phone_number,
+        'register_date': user.registered_at.strftime('%Y-%m-%d') if user.registered_at else '',
+        'clinic_name': user.clinic_name,
+        'clinic_email': user.clinic_email,
+        'address_street': user.address_street,
+        'address_city': user.address_city,
+        'address_state': user.address_state,
+        'address_zip': user.address_zip,
+        'address_country': user.address_country,
+        'license_number': user.license_number,
+        'license_country': user.license_country,
+        'medical_degree': user.medical_degree,
+        'specialty': user.specialty,
+        'subspecialty': user.subspecialty,
+        'current_employer': user.current_employer,
+        'is_blocked': user.is_blocked,
+    })
+        
+
 @dashboard_bp.route('/')
 def home():
     if not session.get('user_id'):
@@ -25,8 +67,11 @@ def home():
 def cases():
     if not session.get('user_id'):
         return redirect(url_for('auth.login'))
-    # You can fetch and pass cases here if needed
-    return render_template('dashboard/cases.html', active_page='cases', doctor_name=g.doctor_user, license_number=g.license_number)
+    user_id = session.get('user_id')
+    reports = SavedReport.query.filter_by(user_id=user_id).order_by(SavedReport.created_at.desc()).all()
+    return render_template('dashboard/cases.html', reports=reports, active_page='cases', doctor_name=g.doctor_user, license_number=g.license_number)
+
+
 
 @dashboard_bp.route('/help')
 def help():
@@ -46,3 +91,155 @@ def analyze():
     fasta_content = fasta_file.read().decode('utf-8', errors='ignore')
     # TODO: Process fasta_content, notes, model as needed...
     return jsonify({'status': 'success'})
+
+
+
+
+
+
+
+
+
+
+
+# Testing for Templates
+# Analyze Template
+@dashboard_bp.route('/report/<int:report_id>')
+def report_view(report_id):
+    # Simulate DB fetch
+    report = {
+        "date": "May 26, 2025",
+        "case_id": report_id,
+        "file_name": "e_coli_sample",
+        "severity": "Moderate",
+        "specimen_number": 23,
+        "genome_length": "4.6 Mb",
+        "name": "Escherichia coli",
+        "gc_content": "50.8%",
+        "resistance": "High",
+        "background": "Escherichia coli is a versatile bacterium...",
+        "best_phage": "Phage X1 (95%)",
+        "match_effectiveness": "91%",
+        "match_count": 2,
+        "partial_matches": 1,
+        "support_phone": "1-800-555-1234",
+        "support_email": "vendor@digitaltherapeutix.com"
+    }
+    return render_template("components/analysis_report.html", report=report)
+
+
+
+@dashboard_bp.route('/report/<int:report_id>/download')
+def download_pdf(report_id):
+    user_id = session.get('user_id')
+    user_name = session.get('doctor_name', 'Doctor')
+    if not user_id:
+        flash("You must be logged in to download reports.", "danger")
+        return redirect(url_for('auth.login'))
+
+    # Simulated report data (replace with actual fetch logic)
+    report = {
+        "date": "May 26, 2025",
+        "case_id": report_id,
+        "file_name": "e_coli_sample",
+        "severity": "Moderate",
+        "specimen_number": 23,
+        "genome_length": "4.6 Mb",
+        "name": "Escherichia coli",
+        "gc_content": "50.8%",
+        "resistance": "High",
+        "background": "Escherichia coli is a versatile bacterium...",
+        "best_phage": "Phage X1 (95%)",
+        "match_effectiveness": "91%",
+        "match_count": 2,
+        "partial_matches": 1,
+        "support_phone": "1-800-555-1234",
+        "support_email": "vendor@digitaltherapeutix.com"
+    }
+
+    # Generate PDF in memory
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    elements = []
+
+    def add_title(text):
+        elements.append(Spacer(1, 10))
+        elements.append(Paragraph(f"<b>{text}</b>", styles["Heading3"]))
+        elements.append(Spacer(1, 4))
+
+    elements.append(Paragraph("Quint Analysis Report", styles["Title"]))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f"Date: {report['date']}<br/>Case ID: {report['case_id']}", styles["Normal"]))
+    elements.append(Spacer(1, 12))
+
+    add_title("Uploaded Scan Data")
+    data_table = [
+        ["Uploaded File Name", report["file_name"]],
+        ["Severity", report["severity"]],
+        ["Specimen Number", report["specimen_number"]],
+        ["Genome Length", report["genome_length"]],
+        ["Name", report["name"]],
+        ["GC Content", report["gc_content"]],
+        ["Resistance", report["resistance"]],
+        ["Background", report["background"]],
+    ]
+    table = Table(data_table, colWidths=[150, 350])
+    table.setStyle(TableStyle([
+        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    add_title("Match Status & Result")
+    match_table = [
+        ["Most Effective Phage", report["best_phage"]],
+        ["Match Effectiveness", report["match_effectiveness"]],
+        ["100% Matches", report["match_count"]],
+        ["Partial Matches", report["partial_matches"]],
+    ]
+    match = Table(match_table, colWidths=[200, 300])
+    match.setStyle(TableStyle([
+        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    elements.append(match)
+    elements.append(Spacer(1, 12))
+
+    elements.append(Paragraph(f"""
+        <b>Support</b><br/>
+        Phone: {report['support_phone']}<br/>
+        Email: {report['support_email']}
+    """, styles["Normal"]))
+
+    doc.build(elements)
+
+    # Prepare save path
+    base_dir = os.path.abspath(os.path.join('app', 'static', 'pdf_reports'))
+    user_folder = os.path.join(base_dir, f'user_{user_id}')
+    os.makedirs(user_folder, exist_ok=True)
+
+    # Check and remove old report
+    existing = SavedReport.query.filter_by(user_id=user_id, report_id=report_id).first()
+    if existing:
+        old_path = os.path.join(user_folder, existing.filename)
+        if os.path.exists(old_path):
+            os.remove(old_path)
+        db.session.delete(existing)
+        db.session.commit()
+
+    # Save new PDF
+    filename = f'{user_name}_{report_id}_{datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")}.pdf'
+    filepath = os.path.join(user_folder, filename)
+
+    with open(filepath, 'wb') as f:
+        f.write(buffer.getvalue())
+
+    # Save new DB record
+    saved = SavedReport(user_id=user_id, report_id=report_id, filename=filename)
+    db.session.add(saved)
+    db.session.commit()
+
+    return send_file(filepath, as_attachment=True, download_name=filename)
+

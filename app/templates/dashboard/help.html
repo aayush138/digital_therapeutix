@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-2">
+        {% for category, message in messages %}
+          <div class="px-4 py-3 rounded shadow-lg text-white
+            {% if category == 'success' %}bg-green-600{% elif category == 'danger' %}bg-red-600{% elif category == 'warning' %}bg-yellow-500{% else %}bg-gray-800{% endif %} animate-fade-in"
+          >
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        setTimeout(function() {
+          var toast = document.getElementById('toast-container');
+          if (toast) toast.style.display = 'none';
+        }, 10000);
+      </script>
+      <style>
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px);}
+          to { opacity: 1; transform: translateY(0);}
+        }
+        .animate-fade-in { animation: fade-in 0.4s;}
+      </style>
+    {% endif %}
+  {% endwith %}
+
+  <div class="min-h-[94vh] flex">
+    {% include 'dashboard/sidebardoctor.html' %}
+    <section class="w-full px-6 py-4 min-h-[94vh]">
+      <div class="bg-white rounded-xl shadow-md p-6">
+
+        <div class="grid grid-cols-2 grid-rows-1 gap-4">
+            <div>
+                <h2 class="text-4xl font-semibold text-gray-800 mb-4">Help Center</h2>
+                <p class="text-sm text-gray-500">Stuck somewhere or have a question? We’re here to assist you with anything you need during the process.</p>
+
+                <img src="{{ url_for('static', filename='images/help.png') }}" alt="Help" class="mt-8 object-cover w-full h-[544px] rounded-3xl" />
+            </div>
+
+            <div class="max-w-xl mx-auto flex flex-col justify-center gap-4 p-6 font-sans text-gray-800">
+                <div>
+                    <h2 class="text-2xl font-bold pb-4">Got questions? We’re here to help.</h2>
+                    <p class="text-sm text-gray-800">For quick support, reach out to us via:</p>
+                </div>
+                <a href="tel:+91-9876543210" class="flex flex items-center gap-2 group">
+                    <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100">
+                        <svg class="w-5 h-10 transition group-hover:text-green-700"
+                            fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 5.75C3 4.784 3.784 4 4.75 4h2.5A1.75 1.75 0 019 5.75v2.5A1.75 1.75 0 017.25 10H6.5a11.5 11.5 0 005 5l.25-.75A1.75 1.75 0 0115.75 15h2.5A1.75 1.75 0 0120 16.75v2.5A1.75 1.75 0 0118.25 21C10.268 21 3 13.732 3 5.75z"/>
+                        </svg>
+                    </div>
+                    <span class="hidden lg:block text-l font-medium transition group-hover:text-green-700">+91-9876543210</span>
+                </a>
+                <a href="mailto:support@yourplatform.com" class="flex flex items-center gap-2 group">
+                    <div class="w-12 h-12 rounded-full shadow-md flex items-center justify-center transition group-hover:bg-green-100">
+                        <svg class="w-5 h-10 transition group-hover:text-green-700"
+                            fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/>
+                        </svg>
+                    </div>
+                    <span class="hidden lg:block text-l font-medium transition group-hover:text-green-700">support@yourplatform.com</span>
+                </a>
+            </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+{% endblock %}
