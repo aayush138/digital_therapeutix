@@ -44,8 +44,8 @@
   </div>
   <aside>
     <!-- Profile -->
-    <div class="flex flex-col items-center gap-6 cursor-pointer open-user-modal">
-      <div class="flex flex-col gap-2">
+    <div class="flex flex-col items-center gap-6">
+      <div class="flex flex-col gap-2 open-user-modal cursor-pointer">
         <img src="{{ url_for('static', filename='/images/profile.jpg') }}"
             class="w-12 h-12 rounded-full border m-auto" alt="Admin">
         <div>
@@ -98,6 +98,14 @@
   const closeBtn = document.getElementById('closeModal');
   const userDetailsContent = document.getElementById('userDetailsContent');
   const openBtns = document.querySelectorAll('.open-user-modal');
+  const logoutBtn = document.querySelector('a[href="/auth/logout"]');
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(event) {
+      event.stopPropagation(); // Prevents modal popup when logging out
+      // Let the default logout action proceed
+    });
+  }  
 
   openBtns.forEach(btn => {
     btn.addEventListener('click', () => {

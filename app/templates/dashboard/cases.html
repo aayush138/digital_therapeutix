@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-2">
+        {% for category, message in messages %}
+          <div class="px-4 py-3 rounded shadow-lg text-white
+            {% if category == 'success' %}bg-green-600{% elif category == 'danger' %}bg-red-600{% elif category == 'warning' %}bg-yellow-500{% else %}bg-gray-800{% endif %} animate-fade-in"
+          >
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        setTimeout(function() {
+          var toast = document.getElementById('toast-container');
+          if (toast) toast.style.display = 'none';
+        }, 10000);
+      </script>
+      <style>
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px);}
+          to { opacity: 1; transform: translateY(0);}
+        }
+        .animate-fade-in { animation: fade-in 0.4s;}
+      </style>
+    {% endif %}
+  {% endwith %}
+
+
+   <div class="min-h-[94vh] flex">
+        {% include 'dashboard/sidebardoctor.html' %}
+        <section class="w-full px-6 py-4 min-h-[94vh]">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                        <h2 class="text-2xl font-semibold mb-3">Case History</h2>
+                        <p class="text-gray-600 text-sm">Access your past FASTA file uploads, review analysis results, download reports, or contact vendors to request phage therapies—all in one place.</p>
+                        </div>
+                        <div class="relative w-60">
+                            <input id="searchInput" type="text" placeholder="Search by case ID" class="pl-5 pr-8 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-300 text-sm">
+                            <svg class="absolute right-3 top-3.5 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div id="casesContainer" class="space-y-4">
+                        {% for report in reports %}
+                        <div class="flex justify-between items-center border rounded-lg p-4 shadow-sm">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="font-medium">Case ID: #{{ report.report_id }}</p>
+                                    <span class="inline-block mt-1 text-green-700 bg-green-100 text-xs font-medium px-2 py-0.5 rounded-full">Match Found</span>
+                                </div>    
+                                <p class="text-xs text-gray-500">Date: {{ report.created_at.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                            <div class="flex gap-2">
+                            {% if loop.index0 == 0 %}
+                                <a href="tel:18005551234" class="bg-transparent text-green-700 text-center border border-green-700 py-3 px-4 rounded-2xl hover:bg-green-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-700 transition">Contact Vendor 
+                                    <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.75C3 4.784 3.784 4 4.75 4h2.5A1.75 1.75 0 019 5.75v2.5A1.75 1.75 0 017.25 10H6.5a11.5 11.5 0 005 5l.25-.75A1.75 1.75 0 0115.75 15h2.5A1.75 1.75 0 0120 16.75v2.5A1.75 1.75 0 0118.25 21C10.268 21 3 13.732 3 5.75z"/>
+                                    </svg>
+                                </a>
+                            {% endif %}
+                            <a href="{{ url_for('dashboard.download_pdf', report_id=report.report_id) }}"
+                                class="bg-green-700 hover:bg-green-700 text-white text-sm px-4 py-3 rounded-2xl flex items-center gap-2 transition">
+                                Download Analytics
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5 5 5-5"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12"/>
+                                </svg>
+                            </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination Placeholder -->
+                    <div class="mt-6 text-center text-sm text-gray-500">
+                        Showing 1–5 of {{ cases|length }} cases
+                    </div>
+                </div>
+            </div>
+        </section>
+   </div>    
+
+
+
+<script>
+document.getElementById("searchInput").addEventListener("input", function() {
+  const query = this.value;
+  fetch(`/filter-cases?q=${query}`)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("casesContainer");
+      container.innerHTML = "";
+
+      data.forEach((c, index) => {
+        const div = document.createElement("div");
+        div.className = "flex justify-between items-center border rounded-lg p-4 shadow-sm";
+        div.innerHTML = `
+          <div>
+            <p class="font-medium">Case ID: #${c.case_id}</p>
+            <p class="text-xs text-gray-500">Date: ${c.date}</p>
+            <span class="inline-block mt-1 text-green-700 bg-green-100 text-xs font-medium px-2 py-0.5 rounded-full">Match Found</span>
+          </div>
+          <div class="flex gap-2">
+            ${index === 0 ? `<a href="tel:18005551234" class="border px-4 py-2 rounded text-sm hover:bg-gray-100">Contact Vendor 📞</a>` : ''}
+            <a href="/download/${c.case_id}" class="bg-green-700 text-white px-4 py-2 rounded text-sm flex items-center gap-2 hover:bg-green-800">
+              Download Analytics <i class="lucide lucide-download w-4 h-4"></i>
+            </a>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    });
+});
+</script>
+
+{% endblock %}

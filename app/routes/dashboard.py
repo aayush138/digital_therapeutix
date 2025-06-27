@@ -67,9 +67,35 @@ def home():
 def cases():
     if not session.get('user_id'):
         return redirect(url_for('auth.login'))
+
     user_id = session.get('user_id')
-    reports = SavedReport.query.filter_by(user_id=user_id).order_by(SavedReport.created_at.desc()).all()
-    return render_template('dashboard/cases.html', reports=reports, active_page='cases', doctor_name=g.doctor_user, license_number=g.license_number)
+    reports = SavedReport.query.filter_by(user_id=user_id).order_by(SavedReport.created_at.desc()).limit(5).all()
+    return render_template('dashboard/cases.html', reports=reports, active_page='cases',
+                           doctor_name=g.doctor_user, license_number=g.license_number)
+
+@dashboard_bp.route('/cases/filter')
+def filter_cases():
+    if not session.get('user_id'):
+        return jsonify([])
+
+    user_id = session.get('user_id')
+    query = request.args.get('q', '').strip()
+
+    if query:
+        reports = SavedReport.query.filter(
+            SavedReport.user_id == user_id,
+            SavedReport.case_id.ilike(f"%{query}%")
+        ).order_by(SavedReport.created_at.desc()).limit(5).all()
+    else:
+        reports = SavedReport.query.filter_by(user_id=user_id).order_by(SavedReport.created_at.desc()).limit(5).all()
+
+    # Convert to JSON
+    data = [{
+        'case_id': r.report_id,
+        'date': r.created_at.strftime('%d/%m/%Y')
+    } for r in reports]
+
+    return jsonify(data)
 
 
 
@@ -137,7 +163,7 @@ def download_pdf(report_id):
         flash("You must be logged in to download reports.", "danger")
         return redirect(url_for('auth.login'))
 
-    # Simulated report data (replace with actual fetch logic)
+    # Simulated report data (replace this with actual database fetch logic)
     report = {
         "date": "May 26, 2025",
         "case_id": report_id,
@@ -173,6 +199,7 @@ def download_pdf(report_id):
     elements.append(Paragraph(f"Date: {report['date']}<br/>Case ID: {report['case_id']}", styles["Normal"]))
     elements.append(Spacer(1, 12))
 
+    # Uploaded Scan Data
     add_title("Uploaded Scan Data")
     data_table = [
         ["Uploaded File Name", report["file_name"]],
@@ -186,12 +213,13 @@ def download_pdf(report_id):
     ]
     table = Table(data_table, colWidths=[150, 350])
     table.setStyle(TableStyle([
-        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
     ]))
     elements.append(table)
     elements.append(Spacer(1, 12))
 
+    # Match Result
     add_title("Match Status & Result")
     match_table = [
         ["Most Effective Phage", report["best_phage"]],
@@ -201,12 +229,13 @@ def download_pdf(report_id):
     ]
     match = Table(match_table, colWidths=[200, 300])
     match.setStyle(TableStyle([
-        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
     ]))
     elements.append(match)
     elements.append(Spacer(1, 12))
 
+    # Support Info
     elements.append(Paragraph(f"""
         <b>Support</b><br/>
         Phone: {report['support_phone']}<br/>
@@ -215,31 +244,17 @@ def download_pdf(report_id):
 
     doc.build(elements)
 
-    # Prepare save path
-    base_dir = os.path.abspath(os.path.join('app', 'static', 'pdf_reports'))
-    user_folder = os.path.join(base_dir, f'user_{user_id}')
-    os.makedirs(user_folder, exist_ok=True)
+    # Create dynamic filename for download (NOT stored permanently)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    filename = f'{user_name}_{report_id}_{timestamp}.pdf'
 
-    # Check and remove old report
-    existing = SavedReport.query.filter_by(user_id=user_id, report_id=report_id).first()
-    if existing:
-        old_path = os.path.join(user_folder, existing.filename)
-        if os.path.exists(old_path):
-            os.remove(old_path)
-        db.session.delete(existing)
-        db.session.commit()
+    # Return the PDF from memory without saving to disk or updating DB
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/pdf'
+    )
 
-    # Save new PDF
-    filename = f'{user_name}_{report_id}_{datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")}.pdf'
-    filepath = os.path.join(user_folder, filename)
-
-    with open(filepath, 'wb') as f:
-        f.write(buffer.getvalue())
-
-    # Save new DB record
-    saved = SavedReport(user_id=user_id, report_id=report_id, filename=filename)
-    db.session.add(saved)
-    db.session.commit()
-
-    return send_file(filepath, as_attachment=True, download_name=filename)
 
