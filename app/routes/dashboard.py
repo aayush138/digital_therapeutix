@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, g, request, jsonify, make_response, send_file
-from app.models.user import User, SavedReport, db
+from app.models.user import User, db
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from datetime import datetime, timezone
+from app.utils.quintx.quint_analysis import run_quint_analysis
 import os
 
 
@@ -110,13 +111,122 @@ def help():
 @dashboard_bp.route('/analyze', methods=['POST'])
 def analyze():
     fasta_file = request.files.get('fasta')
-    notes = request.form.get('notes')
-    model = request.form.get('model')
+    notes = request.form.get('notes', '')
+    model = request.form.get('model', '').strip().lower()
+
+    try:
+        threshold = float(request.form.get('threshold', 96.2))
+    except ValueError:
+        return jsonify({'status': 'error', 'message': 'Invalid threshold value'}), 400
+
     if not fasta_file:
         return jsonify({'status': 'error', 'message': 'No file uploaded'}), 400
-    fasta_content = fasta_file.read().decode('utf-8', errors='ignore')
-    # TODO: Process fasta_content, notes, model as needed...
-    return jsonify({'status': 'success'})
+
+    if model == "quint":
+        try:
+            result = run_quint_analysis(fasta_file, threshold, notes)
+
+            if isinstance(result, dict) and result.get("analysis_id"):
+                analysis_id = result["analysis_id"]
+                return jsonify({
+                    'status': 'success',
+                    'redirect_url': f'/dashboard/analysis/result/{analysis_id}'
+                })
+
+            return jsonify({'status': 'error', 'message': 'Analysis failed or invalid result format'}), 500
+
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': f'Unexpected error: {str(e)}'}), 500
+
+    return jsonify({'status': 'error', 'message': f'Model \"{model}\" not implemented.'}), 400
+
+
+
+
+@dashboard_bp.route('/analysis/result/<int:analysis_id>')
+def view_analysis_result(analysis_id):
+    from app.models.quintx import (
+        CaseReport, PhageMatch, Bacteria, Phages, Manufacturers,
+        AdditionalMatch, AdditionalPhageMatch, PhagesManufacturers
+    )
+
+    case = CaseReport.query.get_or_404(analysis_id)
+    bacteria = Bacteria.query.filter_by(name=case.name).first()
+
+    bacteria_info = {
+        "name": bacteria.name if bacteria else "Unknown",
+        "ncbi_id": getattr(bacteria, "ncbi_id", "N/A"),
+        "tax_id": getattr(bacteria, "tax_id", "N/A"),
+    }
+
+    # Main match phages
+    phage_matches = PhageMatch.query.filter_by(case_report_id=case.id).all()
+    phage_info_list = []
+    for match in phage_matches:
+        # You can join with Phages if needed to get NCBI ID etc.
+        phage = Phages.query.filter_by(name=match.phage_name).first()
+        manufacturer_data = (
+            db.session.query(Manufacturers.name, PhagesManufacturers.price)
+            .join(PhagesManufacturers, Manufacturers.manufacturer_id == PhagesManufacturers.manufacturer_id)
+            .filter(PhagesManufacturers.phage_id == phage.phage_id if phage else None)
+            .all()
+        )
+        phage_info_list.append({
+            "name": match.phage_name,
+            "ncbi": getattr(phage, "ncbi_id", "N/A") if phage else "N/A",
+            "manufacturers": [
+                {"name": name, "price": f"${price:.2f}"} for name, price in manufacturer_data
+            ] if manufacturer_data else [{"name": "None", "price": "N/A"}]
+        })
+
+    # Additional matches
+    additional_outputs = []
+    additional_matches = AdditionalMatch.query.filter_by(case_report_id=case.id).all()
+
+    for add in additional_matches:
+        phage_links = AdditionalPhageMatch.query.filter_by(additional_match_id=add.id).all()
+
+        phage_info_list = []
+        for link in phage_links:
+            phage = Phages.query.filter_by(phage_id=link.phage_id).first()
+            if not phage:
+                continue
+
+            manufacturer_data = (
+                db.session.query(Manufacturers.name, PhagesManufacturers.price)
+                .join(PhagesManufacturers, Manufacturers.manufacturer_id == PhagesManufacturers.manufacturer_id)
+                .filter(PhagesManufacturers.phage_id == phage.phage_id)
+                .all()
+            )
+
+            phage_info_list.append({
+                "name": phage.name,
+                "ncbi": phage.ncbi_id or "N/A",
+                "manufacturers": [
+                    {"name": name, "price": f"${price:.2f}"} for name, price in manufacturer_data
+                ] if manufacturer_data else [{"name": "None", "price": "N/A"}]
+            })
+
+        additional_outputs.append({
+            "prob": add.match_score,
+            "bacteria_info": {
+                "name": add.bacteria_name,
+                "ncbi_id": add.ncbi_id or "N/A",
+                "tax_id": add.tax_id or "N/A",
+            },
+            "phage_info_list": phage_info_list
+        })
+
+    return render_template(
+        "dashboard/result.html",
+        report=case,
+        bacteria_info=bacteria_info,
+        phage_info_list=phage_info_list,
+        additional_outputs=additional_outputs,
+        no_match=False
+    )
+
+
 
 
 

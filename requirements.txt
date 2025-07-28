@@ -1,12 +1,31 @@
-Flask
-Flask-WTF
-Flask-SQLAlchemy
+# Frontend dependencies
+Flask==3.1.1
 Flask-Mail
+Flask-Migrate
 Flask-Session
-python-dotenv
-Werkzeug
+Flask-SQLAlchemy==3.1.1
+Flask-WTF
+Werkzeug==3.1.3
 WTForms
 PyJWT
 email_validator
-Flask-Migrate
+python-dotenv==1.1.1
 reportlab
+
+# Backend dependencies
+biopython==1.85
+blinker==1.9.0
+click==8.2.1
+colorama==0.4.6
+greenlet==3.2.3
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.2
+numpy==2.3.1
+pandas==2.3.1
+python-dateutil==2.9.0.post0
+pytz==2025.2
+six==1.17.0
+SQLAlchemy==2.0.41
+typing_extensions==4.14.1
+tzdata==2025.2

@@ -46,6 +46,9 @@ class User(db.Model):
     reset_token = db.Column(db.String(256), nullable=True)
     reset_token_expiry = db.Column(db.DateTime(timezone=True), nullable=True)
 
+    # Relationship with CaseReport
+    case_reports = db.relationship('CaseReport', back_populates='user')
+
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
@@ -54,12 +57,3 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
-    
-
-
-class SavedReport(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)  # ForeignKey if needed
-    report_id = db.Column(db.Integer, nullable=False)
-    filename = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))    
