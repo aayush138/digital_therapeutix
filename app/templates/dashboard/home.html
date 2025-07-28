@@ -122,87 +122,148 @@ Example: 'Sample collected from patient X, suspected E. coli infection, urgent p
     </section>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const uploadBtn = document.getElementById('upload-btn');
-      const fileInput = document.getElementById('file-input');
-      const uploadArea = document.getElementById('upload-area');
-      const fileNameDiv = document.getElementById('file-name');
-      const errorDiv = document.getElementById('upload-error');
-      let uploadedFastaFile = null;
 
-      uploadBtn.addEventListener('click', () => fileInput.click());
-      uploadArea.addEventListener('click', (e) => {
-        if (e.target === uploadArea || e.target === fileNameDiv) fileInput.click();
-      });
+  <!-- Popup Model Tracking -->
+  <!-- Overlay -->
+  <div id="analysis-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="flex flex-col bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center relative margin-auto">
+      <!-- Check Icon -->
+      <img src="{{ url_for('static', filename='images/success.png') }}" alt="Success" class="mx-auto mb-6" />
+      <h2 class="text-lg text-gray-600">Great! Your case ID is</h2>
+      <div id="case-id" class="text-3xl font-bold text-gray-900 my-2">#XXXXX</div>
 
-      uploadArea.addEventListener('dragover', e => {
-        e.preventDefault();
-        uploadArea.classList.add('ring-2', 'ring-green-700');
-      });
-      uploadArea.addEventListener('dragleave', e => {
-        e.preventDefault();
-        uploadArea.classList.remove('ring-2', 'ring-green-700');
-      });
-      uploadArea.addEventListener('drop', e => {
-        e.preventDefault();
-        uploadArea.classList.remove('ring-2', 'ring-green-700');
-        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-      });
+      <p class="text-sm text-gray-500">We’re running your analysis now. Get ready for insights in:</p>
 
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files.length) handleFile(fileInput.files[0]);
-      });
+      <!-- Timer -->
+      <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4 relative overflow-hidden">
+        <div id="progress-bar" class="bg-green-500 h-2.5 w-0 transition-all duration-[10000ms]"></div>
+      </div>
+      <p id="timer-text" class="mt-2 text-sm text-gray-600">15 sec.</p>
 
-      function handleFile(file) {
-        errorDiv.textContent = '';
-        if (!file.name.match(/\.(fasta|fa)$/i)) {
-          errorDiv.textContent = 'Only FASTA files (.fasta, .fa) are accepted.';
-          return;
-        }
-        if (file.size > 10 * 1024 * 1024) {
-          errorDiv.textContent = 'File size exceeds 10MB.';
-          return;
-        }
-        uploadedFastaFile = file;
-        fileNameDiv.textContent = `Selected: ${file.name}`;
+      <p id="delay-msg" class="text-sm text-yellow-600 font-medium hidden mt-2">
+        Taking longer than usual...
+      </p>
+    </div>
+  </div>
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
+    const uploadArea = document.getElementById('upload-area');
+    const fileNameDiv = document.getElementById('file-name');
+    const errorDiv = document.getElementById('upload-error');
+    let uploadedFastaFile = null;
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('click', (e) => {
+      if (e.target === uploadArea || e.target === fileNameDiv) fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadArea.classList.add('ring-2', 'ring-green-700');
+    });
+    uploadArea.addEventListener('dragleave', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('ring-2', 'ring-green-700');
+    });
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('ring-2', 'ring-green-700');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      errorDiv.textContent = '';
+      if (!file.name.match(/\.(fasta|fa)$/i)) {
+        errorDiv.textContent = 'Only FASTA files (.fasta, .fa) are accepted.';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        errorDiv.textContent = 'File size exceeds 10MB.';
+        return;
+      }
+      uploadedFastaFile = file;
+      fileNameDiv.textContent = `Selected: ${file.name}`;
+    }
+
+    document.getElementById('submit-analysis').addEventListener('click', async function () {
+      if (!uploadedFastaFile) {
+        alert('Please upload a FASTA file first.');
+        return;
       }
 
-      document.getElementById('submit-analysis').addEventListener('click', function () {
-        if (!uploadedFastaFile) {
-          alert('Please upload a FASTA file first.');
-          return;
+      // Generate case ID
+      const caseID = Math.floor(Math.random() * 90000) + 10000;
+      document.getElementById("case-id").innerText = `#${caseID}`;
+      document.getElementById("analysis-popup").classList.remove("hidden");
+
+      const progress = document.getElementById("progress-bar");
+      const timerText = document.getElementById("timer-text");
+      const delayMsg = document.getElementById("delay-msg");
+      progress.style.width = "0%";
+      delayMsg.classList.add("hidden");
+
+      // Timer logic
+      let secondsLeft = 15;
+      const countdown = setInterval(() => {
+        secondsLeft--;
+        timerText.textContent = `${secondsLeft} sec.`;
+        if (secondsLeft <= 0) {
+          clearInterval(countdown);
+          delayMsg.classList.remove("hidden");
         }
-        const notes = document.querySelector('textarea')?.value || '';
-        const model = document.querySelector('input[name="model"]:checked')?.value || 'QUINT';
-        const threshold = document.getElementById('threshold')?.value || '50';
+      }, 1000);
+      setTimeout(() => progress.style.width = "100%", 50);
 
-        const formData = new FormData();
-        formData.append('fasta', uploadedFastaFile);
-        formData.append('notes', notes);
-        formData.append('model', model);
-        formData.append('threshold', threshold);
+      // Collect data
+      const notes = document.querySelector('textarea')?.value || '';
+      const model = document.querySelector('input[name="model"]:checked')?.value || 'QUINT';
+      const threshold = document.getElementById('threshold')?.value || '50';
 
-        fetch('/dashboard/analyze', {
+      const formData = new FormData();
+      formData.append('fasta', uploadedFastaFile);
+      formData.append('notes', notes);
+      formData.append('model', model);
+      formData.append('threshold', threshold);
+      formData.append('case_id', caseID);
+
+      try {
+        const startTime = Date.now();
+
+        const response = await fetch('/dashboard/analyze', {
           method: 'POST',
           body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            window.location.href = data.redirect_url; // 👈 Redirect to result page
-          } else {
-            alert('Error: ' + (data.message || 'Unknown error'));
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          alert('Failed to submit analysis. Please try again.');
         });
-      });
+
+        const data = await response.json();
+        const elapsed = Date.now() - startTime;
+        const waitTime = Math.max(0, 10000 - elapsed);
+
+        if (data.status === 'success' && data.redirect_url) {
+          setTimeout(() => {
+            window.location.href = data.redirect_url;
+          }, waitTime);
+        } else {
+          clearInterval(countdown);
+          delayMsg.textContent = "❌ No result found. Try again.";
+          delayMsg.classList.remove("hidden");
+        }
+      } catch (err) {
+        clearInterval(countdown);
+        delayMsg.textContent = "⚠️ Something went wrong.";
+        delayMsg.classList.remove("hidden");
+      }
     });
-  </script>
-
-
+  });
+</script>
 
 {% endblock %}

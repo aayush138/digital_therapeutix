@@ -108,6 +108,7 @@ class CaseReport(db.Model):
     __tablename__ = 'case_reports'
 
     id = db.Column(db.Integer, primary_key=True)
+    case_id = db.Column(db.String(10), unique=True, nullable=False, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     uploaded_file_name = db.Column(db.String(255))

@@ -7,7 +7,7 @@ from app.extensions import db
 from app.models.quintx import CaseReport, PhageMatch, Bacteria, Phages, Manufacturers, BacteriaPhages, PhagesManufacturers, AdditionalMatch, AdditionalPhageMatch
 from app.utils.matcher.matcher import Matcher
 
-def run_quint_analysis(fasta_file, threshold=96.2, notes=None):
+def run_quint_analysis(fasta_file, threshold=96.2, notes=None,case_id=None):
     filename = secure_filename(fasta_file.filename)
     filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
 
@@ -65,6 +65,7 @@ def run_quint_analysis(fasta_file, threshold=96.2, notes=None):
 
     case = CaseReport(
         user_id=1,
+        case_id=case_id,
         uploaded_file_name=filename,
         specimen_number="N/A",
         genome_length="N/A",
@@ -121,4 +122,4 @@ def run_quint_analysis(fasta_file, threshold=96.2, notes=None):
     db.session.commit()
 
     
-    return {"analysis_id": case.id}
+    return {"analysis_id": case_id}
