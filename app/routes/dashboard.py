@@ -71,9 +71,11 @@ def cases():
         return redirect(url_for('auth.login'))
 
     user_id = session.get('user_id')
-    reports = SavedReport.query.filter_by(user_id=user_id).order_by(SavedReport.created_at.desc()).limit(5).all()
+    reports = CaseReport.query.filter_by(user_id=user_id).order_by(CaseReport.created_at.desc()).limit(5).all()
+
     return render_template('dashboard/cases.html', reports=reports, active_page='cases',
                            doctor_name=g.doctor_user, license_number=g.license_number)
+
 
 @dashboard_bp.route('/cases/filter')
 def filter_cases():
@@ -84,16 +86,15 @@ def filter_cases():
     query = request.args.get('q', '').strip()
 
     if query:
-        reports = SavedReport.query.filter(
-            SavedReport.user_id == user_id,
-            SavedReport.case_id.ilike(f"%{query}%")
-        ).order_by(SavedReport.created_at.desc()).limit(5).all()
+        reports = CaseReport.query.filter(
+            CaseReport.user_id == user_id,
+            CaseReport.case_id.ilike(f"%{query}%")
+        ).order_by(CaseReport.created_at.desc()).limit(5).all()
     else:
-        reports = SavedReport.query.filter_by(user_id=user_id).order_by(SavedReport.created_at.desc()).limit(5).all()
+        reports = CaseReport.query.filter_by(user_id=user_id).order_by(CaseReport.created_at.desc()).limit(5).all()
 
-    # Convert to JSON
     data = [{
-        'case_id': r.report_id,
+        'case_id': r.case_id,
         'date': r.created_at.strftime('%d/%m/%Y')
     } for r in reports]
 
@@ -228,7 +229,9 @@ def view_analysis_result(case_id):
         bacteria_info=bacteria_info,
         main_phage_info_list=main_phage_info_list,  # proper reference
         additional_outputs=additional_outputs,
-        no_match=False
+        no_match=False,
+        doctor_name=g.doctor_user,
+        license_number=g.license_number,
     )
 
 
