@@ -285,35 +285,71 @@ def view_phage_vendors(phage_id):
 
 # Report Viewer
 def get_report_data(report_id):
+    # Get main case report
+    case = CaseReport.query.filter_by(case_id=report_id).first_or_404()
+    # Get the primary bacteria by name from case
+    bacteria = Bacteria.query.filter_by(name=case.name).first()
+
+    primary_bacteria = {
+        "name": bacteria.name if bacteria else case.name or "Unknown",
+        "ncbi": getattr(bacteria, "ncbi_id", "N/A"),
+        "tax_id": getattr(bacteria, "tax_id", "N/A"),
+        "score": int(case.match_score) if case.match_score is not None else 100,
+        "phages": []
+    }
+
+    # --- Main phage matches ---
+    for match in case.phage_matches:
+        phage = match.phage or Phages.query.filter_by(name=match.phage_name).first()
+        if not phage:
+            continue
+
+        # Fetch manufacturer(s) and price(s)
+        manufacturer_links = PhagesManufacturers.query.filter_by(phage_id=phage.phage_id).all()
+
+        for link in manufacturer_links:
+            manufacturer = link.manufacturer
+            primary_bacteria["phages"].append({
+                "name": phage.name,
+                "source": manufacturer.name if manufacturer else "Unknown",
+                "price": f"${link.price:.2f}" if link.price is not None else "N/A"
+            })
+
+    # --- Additional matches ---
+    additional_matches = []
+    for add_match in case.additional_matches:
+        phage_data = []
+
+        for link in add_match.phage_matches:
+            phage = link.phage
+            if not phage:
+                continue
+
+            manufacturer_links = PhagesManufacturers.query.filter_by(phage_id=phage.phage_id).all()
+
+            for m in manufacturer_links:
+                manufacturer = m.manufacturer
+                phage_data.append({
+                    "name": phage.name,
+                    "source": manufacturer.name if manufacturer else "Unknown",
+                    "price": f"${m.price:.2f}" if m.price is not None else "N/A"
+                })
+
+        additional_matches.append({
+            "name": add_match.bacteria_name or "Unknown",
+            "ncbi": add_match.ncbi_id or "N/A",
+            "tax_id": add_match.tax_id or "N/A",
+            "score": int(add_match.match_score or 0),
+            "phages": phage_data
+        })
+
     return {
-        "case_id": report_id,
-        "date": "July 29, 2025",
+        "case_id": case.case_id,
+        "date": case.created_at.strftime("%B %d, %Y") if case.created_at else "N/A",
         "support_phone": "1-800-555-1234",
         "support_email": "vendor@digitaltherapeutix.com",
-        "primary_bacteria": {
-            "name": "E. coli K12",
-            "ncbi": "CAM8821",
-            "tax_id": "964523",
-            "score": 100,
-            "phages": [
-                {"name": "Mt1B1_P1", "source": "Sentinel", "price": "$76.55"},
-                {"name": "Mt1B1_P2", "source": "TailΦR Labs", "price": "$125.19"},
-                {"name": "Mt1B1_P3", "source": "Sentinel", "price": "$184.14"},
-            ]
-        },
-        "additional_matches": [
-            {
-                "name": "E. coli UTI89",
-                "ncbi": "CAM8452",
-                "tax_id": "986543",
-                "score": 87,
-                "phages": [
-                    {"name": "Mt1B1_P5", "source": "PhageX", "price": "$109.24"},
-                    {"name": "Mt1B1_P6", "source": "GenThera", "price": "$122.87"},
-                    {"name": "Mt1B1_P7", "source": "BioSentinel", "price": "$98.65"},
-                ]
-            }
-        ]
+        "primary_bacteria": primary_bacteria,
+        "additional_matches": additional_matches
     }
 
 
