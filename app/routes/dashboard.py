@@ -254,35 +254,6 @@ def view_analysis_result(case_id):
 
 
 
-
-
-
-# Phage Manufacturers
-@dashboard_bp.route('/phage/<phage_id>/vendors')
-def view_phage_vendors(phage_id):
-    phage = Phages.query.get(phage_id)
-
-    if not phage:
-        flash('Phage not found', 'danger')
-        return redirect(url_for('dashboard.index'))
-
-    manufacturers_data = []
-    for pm in phage.manufacturers:
-        manufacturers_data.append({
-            "name": pm.manufacturer.name,
-            "location": pm.manufacturer.address,
-            "price": f"${pm.price:.2f}",
-            "manufacturer_id": pm.manufacturer.manufacturer_id,
-            "description": pm.manufacturer.application,
-        })
-
-    return render_template('dashboard/phage_vendors.html', phage=phage, manufacturers=manufacturers_data)
-
-
-
-
-
-
 # Report Viewer
 def get_report_data(report_id):
     # Get main case report
@@ -393,3 +364,25 @@ def download_pdf(report_id):
     return response
 
 
+
+
+# Phage Manufacturers
+@dashboard_bp.route('/phage/<phage_id>/vendors')
+def view_phage_vendors(phage_id):
+    phage = Phages.query.get(phage_id)
+
+    if not phage:
+        flash('Phage not found', 'danger')
+        return redirect(url_for('dashboard.index'))
+
+    manufacturers_data = []
+    for pm in phage.manufacturers:
+        manufacturers_data.append({
+            "name": pm.manufacturer.name,
+            "location": pm.manufacturer.address,
+            "price": f"${pm.price:.2f}",
+            "manufacturer_id": pm.manufacturer.manufacturer_id,
+            "description": pm.manufacturer.application,
+        })
+
+    return render_template('dashboard/phage_vendors.html', phage=phage, manufacturers=manufacturers_data)
