@@ -11,6 +11,7 @@ PyJWT
 email_validator
 python-dotenv==1.1.1
 reportlab
+weasyprint
 
 # Backend dependencies
 biopython==1.85

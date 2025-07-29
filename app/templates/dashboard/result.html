@@ -124,9 +124,9 @@
                       {% endfor %}
                     </div>
                   </div>
-                  <button class="mt-6 bg-[#4b692f] text-white font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
+                  <a href="{{ url_for('dashboard.view_phage_vendors', phage_id=phage.phage_id) }}" class="mt-6 bg-[#4b692f] text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
                     Select & View Vendors
-                  </button>
+                  </a>
                 </div>
                 {% endfor %}
               </div>
@@ -171,9 +171,9 @@
                       {% endfor %}
                     </div>
                   </div>
-                  <button class="mt-6 bg-[#4b692f] text-white font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
+                  <a href="{{ url_for('dashboard.view_phage_vendors', phage_id=phage.phage_id) }}" class="mt-6 bg-[#4b692f] text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
                     Select & View Vendors
-                  </button>
+                  </a>
                 </div>
                 {% endfor %}
               </div>

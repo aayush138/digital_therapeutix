@@ -1,77 +1,341 @@
-{% extends 'base.html' %}
-{% block title %}Doctor Dashboard{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quint Analysis Report</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      color: #1a202c;
+    }
 
-<!-- Backend Integration Pending -->
-<div class="h-[94vh] flex flex-col justify-center bg-white p-8 text-base text-gray-800 w-[700px] mx-auto rounded-3xl shadow-lg">
-  <!-- Header -->
-  <div class="flex justify-between text-sm text-gray-500 mb-2">
-    <span>{{ report.date }}</span>
-    <span>Case ID: #{{ report.case_id }}</span>
-  </div>
+    .primary-bacteria {
+        background-color: #f4fff4;
+        border-left: 6px solid #2e7d32;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 128, 0, 0.1);
+        margin-bottom: 30px;
+    }
 
-  <!-- Branding -->
-  <div class="text-center mb-6">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DTPx Logo" class="h-8 mx-auto mb-1">
-    <h2 class="text-xl font-semibold text-gray-800">Quint Analysis Report</h2>
-    <p class="text-base text-gray-700">Digital Therapeutix, Inc.</p>
-    <a href="mailto:support@digitaltherapeutix.com" class="text-green-700 text-sm">support@digitaltherapeutix.com</a>
-  </div>
+    .primary-bacteria .score-box {
+        background-color: #d4edda;
+        border: none;
+    }
 
-  <!-- Uploaded Scan Data -->
-  <div class="border rounded-lg p-4 mb-6">
-    <h3 class="text-base font-medium text-green-700 mb-3">Uploaded Scan Data</h3>
-    <div class="grid grid-cols-2 gap-2 text-sm">
-      <div><strong>Uploaded File Name:</strong> {{ report.file_name }}</div>
-      <div><strong>Severity:</strong> {{ report.severity }}</div>
-      <div><strong>Specimen Number:</strong> {{ report.specimen_number }}</div>
-      <div><strong>Genome Length:</strong> {{ report.genome_length }}</div>
-      <div><strong>Name:</strong> {{ report.name }}</div>
-      <div><strong>GC Content:</strong> {{ report.gc_content }}</div>
-      <div><strong>Resistance:</strong> {{ report.resistance }}</div>
-      <div class="col-span-2">
-        <strong>Background:</strong>
-        {{ report.background }}
+    .badge {
+        background-color: #2e7d32;
+        color: white;
+        padding: 2px 8px;
+        font-size: 12px;
+        border-radius: 12px;
+        display: inline-block;
+        margin-top: 6px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #2e7d32;
+    }
+
+    .logo p {
+      margin: 4px 0;
+      color: #555;
+      font-size: 16px;
+    }
+
+    .note {
+      background-color: #eef7ee;
+      padding: 10px 14px;
+      border-left: 4px solid #2e7d32;
+      font-size: 14px;
+      text-align: center;
+      border-radius:5px;
+      margin: 20px 0;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .case-header {
+      background: #e6f4ea;
+      padding: 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .case-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .case-info {
+      margin-top: 10px;
+    }
+
+    .case-info p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    .match-score {
+      background-color: #d4edda;
+      color: #1b5e20;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .manufacturer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid #e1e1e1;
+      /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); */
+      font-size: 16px;
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #2e7d32;
+    }
+
+    .card p {
+      margin: 2px 0;
+      font-size: 15px;
+    }
+
+    .footer-note {
+      font-size: 13px;
+      text-align: center;
+      margin-top: 30px;
+      color: #555;
+    }
+
+    .highlight {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    .score-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f4fff4;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid #d0e6d0;
+    }
+
+    .score-box .details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .score {
+      font-weight: bold;
+      background: #f1bd9a;
+      text-align: center;
+      padding: 15px 20px;
+      border-radius: 15px;
+    }
+
+    .score.low {
+      background: #f1bd9a;
+      color: black;
+      padding: 15px 20px;
+      border-radius: 15px;
+    }
+
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      color: #15803d;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #15803d;
+      color: white;
+      font-size: 16px;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #15803d;
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .icon path {
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 10mm; /* Reduce this value as needed */
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Logo and Title -->
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DTPx Logo" style="height: 48px;margin: auto;">
+      <h2>Quint Analysis Report</h2>
+      <p>Digital Therapeutix, Inc.</p>
+      <p class="highlight">support@digitaltherapeutix.com</p>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <div>{{ report.date }}</div>
+      <div>Case ID: #{{ report.case_id }}</div>
+    </div>
+
+    <!-- Note -->
+    <div class="note">
+      NOTE: For vendor requests, please contact <span class="highlight">{{ report.support_phone }}</span> or email <span class="highlight">{{ report.support_email }}</span>
+    </div>
+
+    <!-- Primary Bacteria Block -->
+    <div class="section primary-bacteria">
+      <div class="score-box">
+        <div class="details">
+          <span><strong>Bacteria:</strong> {{ report.primary_bacteria.name }}</span>
+          <span><strong>NCBI:</strong> {{ report.primary_bacteria.ncbi }}</span>
+          <span><strong>Tax ID:</strong> {{ report.primary_bacteria.tax_id }}</span> 
+        </div>
+        <div class="score">{{ report.primary_bacteria.score }}%</div>
+      </div>
+
+      <div class="manufacturer-grid">
+        {% for phage in report.primary_bacteria.phages %}
+        <div class="card">
+          <strong>{{ phage.name }}</strong>
+          <p>Source: {{ phage.source }}</p>
+          <p>Price: {{ phage.price }}</p>
+        </div>
+        {% endfor %}
       </div>
     </div>
-  </div>
 
-  <!-- Match Status -->
-  <div class="border rounded-lg p-4 mb-6">
-    <h3 class="text-base font-medium text-green-700 mb-3">Match Status & Result</h3>
-    <div class="grid grid-cols-2 gap-2 text-sm">
-      <div><strong>Most Effective Phage:</strong> {{ report.best_phage }}</div>
-      <div><strong>Average Match Effectiveness:</strong> {{ report.match_effectiveness }}</div>
-      <div><strong>Phages with 100% Match:</strong> {{ report.match_count }}</div>
-      <div><strong>Partial Matches:</strong> {{ report.partial_matches }}</div>
+    <!-- Additional Matches -->
+    {% if report.additional_matches %}
+    <h2 style="text-align: center;">Additional Match</h2>
+    {% for match in report.additional_matches %}
+    <div class="section">
+      <div class="score-box">
+        <div class="details">
+          <span><strong>Bacteria:</strong> {{ match.name }}</span>
+          <span><strong>NCBI:</strong> {{ match.ncbi }}</span>
+          <span><strong>Tax ID:</strong> {{ match.tax_id }}</span> 
+        </div>
+        <div class="score low">{{ match.score }}%</div>
+      </div>
+
+      <div class="manufacturer-grid">
+        {% for phage in match.phages %}
+        <div class="card">
+          <strong>{{ phage.name }}</strong>
+          <p>Source: {{ phage.source }}</p>
+          <p>Price: {{ phage.price }}</p>
+        </div>
+        {% endfor %}
+      </div>
     </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="btn-container no-print">
+      <a href="{{ url_for('dashboard.home') }}" class="back-link">Back</a>
+      <a href="{{ url_for('dashboard.download_pdf', report_id=report.case_id) }}" class="download-btn">
+        <span class="icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+            <path d="M7 10l5 5 5-5"/>
+            <path d="M12 4v12"/>
+          </svg>
+        </span>
+        Download
+      </a>
+    </div>
+
   </div>
-
-  <!-- Note -->
-  <p class="text-xs text-gray-800 mb-6">
-    NOTE: For vendor requests, contact: 
-    <span class="text-green-700 font-medium">{{ report.support_phone }}</span>
-    or email 
-    <a class="text-green-700 underline" href="mailto:{{ report.support_email }}">{{ report.support_email }}</a>
-  </p>
-
-  <!-- Footer Buttons -->
-  <div class="flex justify-between items-center">
-    <a href="{{ url_for('dashboard.home') }}" class="text-green-700 hover:underline">Back</a>
-    <a href="{{ url_for('dashboard.download_pdf', report_id=report.case_id) }}"
-       class="bg-green-700 hover:bg-green-700 text-white text-sm px-4 py-3 rounded-2xl flex items-center gap-2 transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
-        <path stroke-linecap="round" stroke-linejoin="round"
-                d="M7 10l5 5 5-5"/>
-        <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 4v12"/>
-        </svg>
-      Download
-    </a>
-  </div>
-</div>
-
-{% endblock %}
+</body>
+</html>

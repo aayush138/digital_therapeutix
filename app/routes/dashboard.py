@@ -1,14 +1,10 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, g, request, jsonify, make_response, send_file
 from app.models.user import User, db
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib import colors
+from weasyprint import HTML
 from app.models.quintx import  CaseReport, PhageMatch, Bacteria, Phages, Manufacturers, AdditionalMatch, AdditionalPhageMatch, PhagesManufacturers
-from reportlab.lib.styles import getSampleStyleSheet
-from io import BytesIO
 from datetime import datetime, timezone
 from app.utils.quintx.quint_analysis import run_quint_analysis
-import os, random
+import os, random, tempfile
 
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -70,11 +66,30 @@ def cases():
     if not session.get('user_id'):
         return redirect(url_for('auth.login'))
 
-    user_id = session.get('user_id')
-    reports = CaseReport.query.filter_by(user_id=user_id).order_by(CaseReport.created_at.desc()).limit(5).all()
+    user_id = session['user_id']
 
-    return render_template('dashboard/cases.html', reports=reports, active_page='cases',
-                           doctor_name=g.doctor_user, license_number=g.license_number)
+    # Get pagination parameters from query string
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 5, type=int)
+
+    # Fetch paginated case reports for the logged-in doctor
+    reports = CaseReport.query.filter_by(user_id=user_id) \
+        .order_by(CaseReport.created_at.desc()) \
+        .paginate(page=page, per_page=per_page)
+
+    # Calculate start and end indices
+    start = (reports.page - 1) * reports.per_page + 1 if reports.total > 0 else 0
+    end = min(reports.page * reports.per_page, reports.total)
+
+    return render_template(
+        'dashboard/cases.html',
+        reports=reports,
+        start=start,
+        end=end,
+        active_page='cases',
+        doctor_name=g.doctor_user,
+        license_number=g.license_number
+    )
 
 
 @dashboard_bp.route('/cases/filter')
@@ -180,6 +195,7 @@ def view_analysis_result(case_id):
         main_phage_info_list.append({
             "name": match.phage_name,
             "ncbi": getattr(phage, "ncbi_id", "N/A") if phage else "N/A",
+            "phage_id": getattr(phage, "phage_id", None) if phage else None,
             "manufacturers": [
                 {"name": name, "price": f"${price:.2f}"} for name, price in manufacturer_data
             ] if manufacturer_data else [{"name": "None", "price": "N/A"}]
@@ -208,6 +224,7 @@ def view_analysis_result(case_id):
             additional_phages.append({
                 "name": phage.name,
                 "ncbi": phage.ncbi_id or "N/A",
+                "phage_id": phage.phage_id,
                 "manufacturers": [
                     {"name": name, "price": f"${price:.2f}"} for name, price in manufacturer_data
                 ] if manufacturer_data else [{"name": "None", "price": "N/A"}]
@@ -240,140 +257,103 @@ def view_analysis_result(case_id):
 
 
 
+# Phage Manufacturers
+@dashboard_bp.route('/phage/<phage_id>/vendors')
+def view_phage_vendors(phage_id):
+    phage = Phages.query.get(phage_id)
+
+    if not phage:
+        flash('Phage not found', 'danger')
+        return redirect(url_for('dashboard.index'))
+
+    manufacturers_data = []
+    for pm in phage.manufacturers:
+        manufacturers_data.append({
+            "name": pm.manufacturer.name,
+            "location": pm.manufacturer.address,
+            "price": f"${pm.price:.2f}",
+            "manufacturer_id": pm.manufacturer.manufacturer_id,
+            "description": pm.manufacturer.application,
+        })
+
+    return render_template('dashboard/phage_vendors.html', phage=phage, manufacturers=manufacturers_data)
 
 
 
 
 
 
+# Report Viewer
+def get_report_data(report_id):
+    return {
+        "case_id": report_id,
+        "date": "July 29, 2025",
+        "support_phone": "1-800-555-1234",
+        "support_email": "vendor@digitaltherapeutix.com",
+        "primary_bacteria": {
+            "name": "E. coli K12",
+            "ncbi": "CAM8821",
+            "tax_id": "964523",
+            "score": 100,
+            "phages": [
+                {"name": "Mt1B1_P1", "source": "Sentinel", "price": "$76.55"},
+                {"name": "Mt1B1_P2", "source": "TailΦR Labs", "price": "$125.19"},
+                {"name": "Mt1B1_P3", "source": "Sentinel", "price": "$184.14"},
+            ]
+        },
+        "additional_matches": [
+            {
+                "name": "E. coli UTI89",
+                "ncbi": "CAM8452",
+                "tax_id": "986543",
+                "score": 87,
+                "phages": [
+                    {"name": "Mt1B1_P5", "source": "PhageX", "price": "$109.24"},
+                    {"name": "Mt1B1_P6", "source": "GenThera", "price": "$122.87"},
+                    {"name": "Mt1B1_P7", "source": "BioSentinel", "price": "$98.65"},
+                ]
+            }
+        ]
+    }
 
-# Testing for Templates
-# Analyze Template
+
+
+# view report
 @dashboard_bp.route('/report/<int:report_id>')
 def report_view(report_id):
-    # Simulate DB fetch
-    report = {
-        "date": "May 26, 2025",
-        "case_id": report_id,
-        "file_name": "e_coli_sample",
-        "severity": "Moderate",
-        "specimen_number": 23,
-        "genome_length": "4.6 Mb",
-        "name": "Escherichia coli",
-        "gc_content": "50.8%",
-        "resistance": "High",
-        "background": "Escherichia coli is a versatile bacterium...",
-        "best_phage": "Phage X1 (95%)",
-        "match_effectiveness": "91%",
-        "match_count": 2,
-        "partial_matches": 1,
-        "support_phone": "1-800-555-1234",
-        "support_email": "vendor@digitaltherapeutix.com"
-    }
+    report = get_report_data(report_id)
     return render_template("components/analysis_report.html", report=report)
 
-
-
+# download report as PDF
 @dashboard_bp.route('/report/<int:report_id>/download')
 def download_pdf(report_id):
     user_id = session.get('user_id')
-    user_name = session.get('doctor_name', 'Doctor')
+    user_name = session.get('doctor_name', 'Doctor').replace(" ", "_")
+
     if not user_id:
         flash("You must be logged in to download reports.", "danger")
         return redirect(url_for('auth.login'))
 
-    # Simulated report data (replace this with actual database fetch logic)
-    report = {
-        "date": "May 26, 2025",
-        "case_id": report_id,
-        "file_name": "e_coli_sample",
-        "severity": "Moderate",
-        "specimen_number": 23,
-        "genome_length": "4.6 Mb",
-        "name": "Escherichia coli",
-        "gc_content": "50.8%",
-        "resistance": "High",
-        "background": "Escherichia coli is a versatile bacterium...",
-        "best_phage": "Phage X1 (95%)",
-        "match_effectiveness": "91%",
-        "match_count": 2,
-        "partial_matches": 1,
-        "support_phone": "1-800-555-1234",
-        "support_email": "vendor@digitaltherapeutix.com"
-    }
+    # Reuse shared report logic
+    report = get_report_data(report_id)
+    rendered_html = render_template("components/analysis_report.html", report=report)
 
-    # Generate PDF in memory
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
-    elements = []
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_pdf:
+            HTML(string=rendered_html, base_url=request.url_root).write_pdf(temp_pdf.name)
+            temp_pdf.seek(0)
+            pdf_data = temp_pdf.read()
+        os.unlink(temp_pdf.name)
+    except Exception as e:
+        flash(f"PDF generation failed: {str(e)}", "danger")
+        return redirect(url_for('dashboard.report_view', report_id=report_id))
 
-    def add_title(text):
-        elements.append(Spacer(1, 10))
-        elements.append(Paragraph(f"<b>{text}</b>", styles["Heading3"]))
-        elements.append(Spacer(1, 4))
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    filename = f"{user_name}_Report_{report_id}_{timestamp}.pdf"
 
-    elements.append(Paragraph("Quint Analysis Report", styles["Title"]))
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph(f"Date: {report['date']}<br/>Case ID: {report['case_id']}", styles["Normal"]))
-    elements.append(Spacer(1, 12))
-
-    # Uploaded Scan Data
-    add_title("Uploaded Scan Data")
-    data_table = [
-        ["Uploaded File Name", report["file_name"]],
-        ["Severity", report["severity"]],
-        ["Specimen Number", report["specimen_number"]],
-        ["Genome Length", report["genome_length"]],
-        ["Name", report["name"]],
-        ["GC Content", report["gc_content"]],
-        ["Resistance", report["resistance"]],
-        ["Background", report["background"]],
-    ]
-    table = Table(data_table, colWidths=[150, 350])
-    table.setStyle(TableStyle([
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-    ]))
-    elements.append(table)
-    elements.append(Spacer(1, 12))
-
-    # Match Result
-    add_title("Match Status & Result")
-    match_table = [
-        ["Most Effective Phage", report["best_phage"]],
-        ["Match Effectiveness", report["match_effectiveness"]],
-        ["100% Matches", report["match_count"]],
-        ["Partial Matches", report["partial_matches"]],
-    ]
-    match = Table(match_table, colWidths=[200, 300])
-    match.setStyle(TableStyle([
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-    ]))
-    elements.append(match)
-    elements.append(Spacer(1, 12))
-
-    # Support Info
-    elements.append(Paragraph(f"""
-        <b>Support</b><br/>
-        Phone: {report['support_phone']}<br/>
-        Email: {report['support_email']}
-    """, styles["Normal"]))
-
-    doc.build(elements)
-
-    # Create dynamic filename for download (NOT stored permanently)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    filename = f'{user_name}_{report_id}_{timestamp}.pdf'
-
-    # Return the PDF from memory without saving to disk or updating DB
-    buffer.seek(0)
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=filename,
-        mimetype='application/pdf'
-    )
+    response = make_response(pdf_data)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
 
 

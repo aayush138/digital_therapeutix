@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Phage Vendor Selection{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row min-h-screen">
+
+  <!-- Left Panel (Phage Details) -->
+  <div class="bg-[#e7f0e7] p-6 w-full lg:w-1/3">
+    <a href="{{ url_for('dashboard.home') }}" class="text-sm text-gray-600 hover:text-black mb-4 block">&larr; Go Back & Select another</a>
+
+    <div class="bg-white rounded-lg p-4 shadow">
+      <h2 class="text-lg font-semibold mb-2">{{ phage.name }}</h2>
+      <p class="text-gray-500 text-sm mb-2">NCBI: {{ phage.ncbi_id }}</p>
+
+      <hr class="my-2">
+
+      <p><strong>Effectiveness:</strong> <span class="text-green-600">95%</span></p>
+      <p><strong>Host Range:</strong> Broad</p>
+      <p><strong>Cost:</strong> Based on Vendor</p>
+      <p><strong>Turnaround Time:</strong> 48 hours</p>
+      <p><strong>Insurance Status:</strong> Approved</p>
+      <p><strong>Match Type:</strong> 100%</p>
+    </div>
+  </div>
+
+  <!-- Right Panel (Vendors List) -->
+  <div class="flex-1 p-6 space-y-4">
+    <h3 class="text-xl font-semibold mb-4">Available Vendors</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for m in manufacturers %}
+        <div class="border rounded-lg p-4 shadow-sm bg-white">
+          <h4 class="font-semibold text-lg mb-1">{{ m.name }}</h4>
+          <p class="text-gray-500 text-sm mb-1">{{ m.location }}</p>
+          <p class="text-gray-600 text-sm mb-2">{{ m.description or "Trusted provider of phage therapies." }}</p>
+          <p class="text-md font-semibold mb-2">Price: {{ m.price }}</p>
+
+          <a href="#" class="bg-green-700 text-white px-4 py-2 text-sm rounded hover:bg-green-800">
+            Request This Vendor
+          </a>
+        </div>
+      {% else %}
+        <p>No vendors available for this phage.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
