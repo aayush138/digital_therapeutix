@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Admin Vendor Request{% endblock %}
+{% block content %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-2">
+        {% for category, message in messages %}
+          <div class="px-4 py-3 rounded shadow-lg text-white
+            {% if category == 'success' %}bg-green-600{% elif category == 'danger' %}bg-red-600{% elif category == 'warning' %}bg-yellow-500{% else %}bg-gray-800{% endif %} animate-fade-in"
+          >
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        setTimeout(function() {
+          var toast = document.getElementById('toast-container');
+          if (toast) toast.style.display = 'none';
+        }, 10000);
+      </script>
+      <style>
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px);}
+          to { opacity: 1; transform: translateY(0);}
+        }
+        .animate-fade-in { animation: fade-in 0.4s;}
+      </style>
+    {% endif %}
+  {% endwith %}
+
+  <div class="min-h-[94vh] flex">
+    {% include 'admin/sidebar.html' %}
+    <section class="w-full px-6 py-8 min-h-[94vh]">
+      <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="text-center py-20">
+                <h1 class="text-3xl font-semibold text-gray-800 mb-4">Vendor Request Panel</h1>
+                <p class="text-gray-600 text-lg mb-6">This feature is coming soon.</p>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                </svg>
+            </div>
+        </div>
+    </section>
+  </div>
+
+{% endblock %}

@@ -32,6 +32,12 @@ def all_users():
     return render_template("admin/dashboard.html", users=users, start=start, end=end, admin_user=g.admin_user, active_page='users', user_template="admin/user.html")
 
 
+
+@admin_bp.route('/vendors')
+def vendor_requests():
+    return render_template('admin/vendor_request.html', admin_user=g.admin_user, active_page='vendors')
+
+
 # User Licence Verification
 @admin_bp.route('/approve/<int:user_id>', methods=['POST'])
 def approve_user(user_id):

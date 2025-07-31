@@ -408,4 +408,4 @@ def view_phage_vendors(phage_id):
             "description": pm.manufacturer.application,
         })
 
-    return render_template('dashboard/phage_vendors.html', phage=phage, bacteria_info=bacteria_info ,manufacturers=manufacturers_data, report_id=report_id)
+    return render_template('dashboard/phage_vendors.html', phage=phage, doctor_name=g.doctor_user, license_number=g.license_number, bacteria_info=bacteria_info ,manufacturers=manufacturers_data, report_id=report_id)
