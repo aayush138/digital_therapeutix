@@ -12,7 +12,6 @@ class Bacteria(db.Model):
     name = db.Column(db.String(100), nullable=False)
     ncbi_id = db.Column(db.String(100))
     tax_id = db.Column(db.String(50))
-    genbank_id = db.Column(db.String(100))
     description = db.Column(db.Text)
 
     phages = db.relationship('BacteriaPhages', back_populates='bacteria')
@@ -26,7 +25,6 @@ class Phages(db.Model):
     name = db.Column(db.String(100), nullable=False)
     ncbi_id = db.Column(db.String(100))
     tax_id = db.Column(db.String(50))
-    genbank_id = db.Column(db.String(100))
     description = db.Column(db.Text)
 
     bacteria = db.relationship('BacteriaPhages', back_populates='phage')
@@ -112,12 +110,7 @@ class CaseReport(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     uploaded_file_name = db.Column(db.String(255))
-    specimen_number = db.Column(db.String(50))
-    genome_length = db.Column(db.String(50))
     name = db.Column(db.String(255))
-    gc_content = db.Column(db.String(50))
-    resistance = db.Column(db.String(50))
-    severity = db.Column(db.String(50))
     background = db.Column(db.Text)
 
     most_effective_phage = db.Column(db.String(100))
@@ -126,8 +119,6 @@ class CaseReport(db.Model):
     matches_100 = db.Column(db.Integer)
     matches_partial = db.Column(db.Integer)
 
-    pdf_filename = db.Column(db.String(255))
-    pdf_path = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', back_populates='case_reports')
@@ -144,10 +135,6 @@ class PhageMatch(db.Model):
     phage_name = db.Column(db.String(100))
     phage_id = db.Column(db.String(150), db.ForeignKey('phages.phage_id'))
     effectiveness = db.Column(db.Float)
-    host_range = db.Column(db.String(100))
-    cost = db.Column(db.String(50))
-    turnaround_time = db.Column(db.String(50))
-    insurance_status = db.Column(db.String(50))
     match_type = db.Column(db.String(50))
     recommended = db.Column(db.Boolean, default=False)
     phage = db.relationship('Phages', backref='phage_matches')

@@ -23,7 +23,6 @@ def load_bacteria_interactions(csv_path):
             name = row.get("bacteria_name", "Unknown Bacteria")
             ncbi_id = row.get("ncbi_id", "").strip()
             tax_id = row.get("tax_id", "").replace("TAX:", "").strip()
-            genbank_id = row.get("genbank_id", "").strip()
 
             # Insert into Bacteria
             if not Bacteria.query.filter_by(bacteria_id=uuid_).first():
@@ -31,7 +30,6 @@ def load_bacteria_interactions(csv_path):
                     bacteria_id=uuid_,
                     name=name,
                     ncbi_id=ncbi_id,
-                    genbank_id=genbank_id,
                     tax_id=tax_id,
                     description=f"{name} strain"
                 ))
@@ -60,7 +58,6 @@ def load_phage_interactions(csv_path):
             name = row.get("phage_name", "Unknown Phage")
             ncbi_id = row.get("ncbi_id", "").strip()
             tax_id = row.get("tax_id", "").replace("TAX:", "").strip()
-            genbank_id = row.get("genbank_id", "").strip()
 
             # Insert into Phages
             if not Phages.query.filter_by(phage_id=uuid_).first():
@@ -68,7 +65,6 @@ def load_phage_interactions(csv_path):
                     phage_id=uuid_,
                     name=name,
                     ncbi_id=ncbi_id,
-                    genbank_id=genbank_id,
                     tax_id=tax_id,
                     description=f"{name} phage"
                 ))

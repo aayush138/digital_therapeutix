@@ -238,14 +238,14 @@ def view_analysis_result(case_id):
                 "ncbi_id": add.ncbi_id or "N/A",
                 "tax_id": add.tax_id or "N/A",
             },
-            "phage_info_list": additional_phages  # clearly named
+            "phage_info_list": additional_phages
         })
 
     return render_template(
         "dashboard/result.html",
         report=case,
         bacteria_info=bacteria_info,
-        main_phage_info_list=main_phage_info_list,  # proper reference
+        main_phage_info_list=main_phage_info_list,
         additional_outputs=additional_outputs,
         no_match=False,
         doctor_name=g.doctor_user,

@@ -32,9 +32,6 @@ class Config:
         },
     ]
 
-    # PDF report save directory (relative to the project root)
-    PDF_REPORT_PATH = os.path.join(basedir, 'static', 'pdf_reports')
-
 
 
 

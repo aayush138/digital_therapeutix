@@ -54,10 +54,6 @@ def run_quint_analysis(fasta_file, threshold=96.2, notes=None,case_id=None):
         phage_match_objs.append(PhageMatch(
             phage_name=phage.name,
             effectiveness=prob,
-            host_range='Unknown',
-            cost='N/A',
-            turnaround_time='Unknown',
-            insurance_status='Unknown',
             match_type='100%' if exact else 'Partial',
             recommended=exact
         ))
@@ -66,24 +62,17 @@ def run_quint_analysis(fasta_file, threshold=96.2, notes=None,case_id=None):
         user_id=session.get('user_id'),
         case_id=case_id,
         uploaded_file_name=filename,
-        specimen_number="N/A",
-        genome_length="N/A",
         name=bacteria.name if bacteria else "Unknown",
-        gc_content="N/A",
-        resistance="Unknown",
-        severity="Unknown",
         background=additional_notes,
         most_effective_phage=phage_info_list[0]["name"] if phage_info_list else "None",
         match_effectiveness=prob,
         match_score=prob,
         matches_100=1 if exact else 0,
         matches_partial=0 if exact else 1,
-        pdf_filename=f"{filename}.pdf",
-        pdf_path=f"/static/reports/{filename}.pdf",
         created_at=datetime.utcnow()
     )
     db.session.add(case)
-    db.session.flush()  # So we can get case.id
+    db.session.flush()
 
     for ph in phage_match_objs:
         ph.case_report_id = case.id
@@ -104,7 +93,7 @@ def run_quint_analysis(fasta_file, threshold=96.2, notes=None,case_id=None):
             match_score=add_prob
         )
         db.session.add(add_match)
-        db.session.flush()  # to get add_match.id
+        db.session.flush()
 
         # Get associated phages for this suggested bacteria
         links = BacteriaPhages.query.filter_by(bacteria_id=bacteria.bacteria_id).all()

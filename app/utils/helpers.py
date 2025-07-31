@@ -102,5 +102,5 @@ def render_email_template(inner_html: str) -> str:
         body_content=inner_html,
         support_email=SUPPORT_EMAIL,
         website_url=WEBSITE_URL,
-        logo_url=f"{WEBSITE_URL}/static/images/favicon.png"  # replace with your actual domain
+        logo_url=f"{WEBSITE_URL}/static/images/favicon.png"
     )
