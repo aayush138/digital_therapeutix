@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, g, request, jsonify, make_response, send_file
 from app.models.user import User, db
 from weasyprint import HTML
+from collections import defaultdict
 from app.models.quintx import  CaseReport, PhageMatch, Bacteria, Phages, Manufacturers, AdditionalMatch, AdditionalPhageMatch, PhagesManufacturers
 from datetime import datetime, timezone
 from app.utils.quintx.quint_analysis import run_quint_analysis
@@ -258,38 +259,47 @@ def view_analysis_result(case_id):
 def get_report_data(report_id):
     # Get main case report
     case = CaseReport.query.filter_by(case_id=report_id).first_or_404()
-    # Get the primary bacteria by name from case
     bacteria = Bacteria.query.filter_by(name=case.name).first()
 
     primary_bacteria = {
         "name": bacteria.name if bacteria else case.name or "Unknown",
         "ncbi": getattr(bacteria, "ncbi_id", "N/A"),
         "tax_id": getattr(bacteria, "tax_id", "N/A"),
-        "score": int(case.match_score) if case.match_score is not None else 100,
+        "score": round(case.match_score, 2) if case.match_score is not None else 100,
         "phages": []
     }
 
-    # --- Main phage matches ---
+    phage_groups = defaultdict(list)
+
     for match in case.phage_matches:
         phage = match.phage or Phages.query.filter_by(name=match.phage_name).first()
         if not phage:
             continue
 
-        # Fetch manufacturer(s) and price(s)
         manufacturer_links = PhagesManufacturers.query.filter_by(phage_id=phage.phage_id).all()
-
         for link in manufacturer_links:
             manufacturer = link.manufacturer
-            primary_bacteria["phages"].append({
-                "name": phage.name,
+            phage_groups[phage.name].append({
                 "source": manufacturer.name if manufacturer else "Unknown",
                 "price": f"${link.price:.2f}" if link.price is not None else "N/A"
             })
 
-    # --- Additional matches ---
+    # Convert grouped phages to list format
+    for phage_name, vendors in phage_groups.items():
+        sorted_vendors = sorted(
+            vendors,
+            key=lambda v: float(v["price"].replace("$", "")) if v["price"] != "N/A" else float("inf")
+        )
+        primary_bacteria["phages"].append({
+            "name": phage_name,
+            "vendors": sorted_vendors
+        })
+
+    # --- Additional Matches Grouped ---
     additional_matches = []
+
     for add_match in case.additional_matches:
-        phage_data = []
+        phage_group = defaultdict(list)
 
         for link in add_match.phage_matches:
             phage = link.phage
@@ -297,21 +307,31 @@ def get_report_data(report_id):
                 continue
 
             manufacturer_links = PhagesManufacturers.query.filter_by(phage_id=phage.phage_id).all()
-
             for m in manufacturer_links:
                 manufacturer = m.manufacturer
-                phage_data.append({
-                    "name": phage.name,
+                phage_group[phage.name].append({
                     "source": manufacturer.name if manufacturer else "Unknown",
                     "price": f"${m.price:.2f}" if m.price is not None else "N/A"
                 })
+
+        # Convert group to list
+        grouped_phages = []
+        for name, vendors in phage_group.items():
+            sorted_vendors = sorted(
+                vendors,
+                key=lambda v: float(v["price"].replace("$", "")) if v["price"] != "N/A" else float("inf")
+            )
+            grouped_phages.append({
+                "name": name,
+                "vendors": sorted_vendors
+            })
 
         additional_matches.append({
             "name": add_match.bacteria_name or "Unknown",
             "ncbi": add_match.ncbi_id or "N/A",
             "tax_id": add_match.tax_id or "N/A",
-            "score": int(add_match.match_score or 0),
-            "phages": phage_data
+            "score": round(add_match.match_score or 0, 2),
+            "phages": grouped_phages
         })
 
     return {
@@ -322,7 +342,6 @@ def get_report_data(report_id):
         "primary_bacteria": primary_bacteria,
         "additional_matches": additional_matches
     }
-
 
 
 # view report
@@ -369,20 +388,24 @@ def download_pdf(report_id):
 # Phage Manufacturers
 @dashboard_bp.route('/phage/<phage_id>/vendors')
 def view_phage_vendors(phage_id):
+    report_id = request.args.get('report_id')
     phage = Phages.query.get(phage_id)
 
     if not phage:
         flash('Phage not found', 'danger')
-        return redirect(url_for('dashboard.index'))
+        return redirect(url_for('dashboard.report_view', report_id=report_id))
+    
+    bacteria_info = [bp.bacteria for bp in phage.bacteria]
 
     manufacturers_data = []
     for pm in phage.manufacturers:
         manufacturers_data.append({
             "name": pm.manufacturer.name,
+            "type": pm.manufacturer.type,
             "location": pm.manufacturer.address,
             "price": f"${pm.price:.2f}",
             "manufacturer_id": pm.manufacturer.manufacturer_id,
             "description": pm.manufacturer.application,
         })
 
-    return render_template('dashboard/phage_vendors.html', phage=phage, manufacturers=manufacturers_data)
+    return render_template('dashboard/phage_vendors.html', phage=phage, bacteria_info=bacteria_info ,manufacturers=manufacturers_data, report_id=report_id)

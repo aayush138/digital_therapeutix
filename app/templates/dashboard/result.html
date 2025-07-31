@@ -71,7 +71,7 @@
 
             <!-- Download -->
             <div class="flex justify-between items-center">
-              <a href="{{ url_for('dashboard.download_pdf', report_id=report.id) }}" class="bg-white border border-green-700 text-green-700 text-sm px-4 py-3 rounded hover:bg-gray-100">
+              <a href="{{ url_for('dashboard.download_pdf', report_id=report.case_id) }}" class="bg-white border border-green-700 text-green-700 text-sm px-4 py-3 rounded-lg hover:bg-gray-100">
                 Download Result 📄
               </a>
             </div>
@@ -124,7 +124,7 @@
                       {% endfor %}
                     </div>
                   </div>
-                  <a href="{{ url_for('dashboard.view_phage_vendors', phage_id=phage.phage_id) }}" class="mt-6 bg-[#4b692f] text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
+                  <a href="{{ url_for('dashboard.view_phage_vendors', phage_id=phage.phage_id, report_id=report.case_id) }}" class="mt-6 bg-[#4b692f] text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
                     Select & View Vendors
                   </a>
                 </div>
@@ -171,7 +171,7 @@
                       {% endfor %}
                     </div>
                   </div>
-                  <a href="{{ url_for('dashboard.view_phage_vendors', phage_id=phage.phage_id) }}" class="mt-6 bg-[#4b692f] text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
+                  <a href="{{ url_for('dashboard.view_phage_vendors', phage_id=phage.phage_id, report_id=report.case_id) }}" class="mt-6 bg-[#4b692f] text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-[#3d5b28] transition">
                     Select & View Vendors
                   </a>
                 </div>

@@ -287,8 +287,11 @@
         {% for phage in report.primary_bacteria.phages %}
         <div class="card">
           <strong>{{ phage.name }}</strong>
-          <p>Source: {{ phage.source }}</p>
-          <p>Price: {{ phage.price }}</p>
+          {% for vendor in phage.vendors %}
+            <p><b>Source:</b> {{ vendor.source }}</p>
+            <p><b>Price:</b> {{ vendor.price }}</p>
+            {% if not loop.last %}<hr style="border: none; border-top: 1px dashed #ccc;" />{% endif %}
+          {% endfor %}
         </div>
         {% endfor %}
       </div>
@@ -312,8 +315,11 @@
         {% for phage in match.phages %}
         <div class="card">
           <strong>{{ phage.name }}</strong>
-          <p>Source: {{ phage.source }}</p>
-          <p>Price: {{ phage.price }}</p>
+          {% for vendor in phage.vendors %}
+            <p><b>Source:</b> {{ vendor.source }}</p>
+            <p><b>Price:</b> {{ vendor.price }}</p>
+            {% if not loop.last %}<hr style="border: none; border-top: 1px dashed #ccc;" />{% endif %}
+          {% endfor %}
         </div>
         {% endfor %}
       </div>
