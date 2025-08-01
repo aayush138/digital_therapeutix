@@ -9,11 +9,6 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 
-@auth_bp.route('/')
-def root():
-    return redirect(url_for('auth.login'))
-
-
 # For the signup route
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():

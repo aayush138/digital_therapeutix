@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, redirect, url_for
 from app.extensions import db, migrate, mail, sess
 from app.routes.auth import auth_bp
 from app.routes.admin import admin_bp
@@ -30,5 +30,11 @@ def create_app():
             seed_database()
         except Exception as e:
             print("Seeding error:", e)
+
+
+    # Root redirect to login
+    @app.route('/')
+    def root():
+        return redirect(url_for('auth.login'), code=301)        
 
     return app
