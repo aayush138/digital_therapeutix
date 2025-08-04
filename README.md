@@ -116,7 +116,7 @@
 - **Backend**: Python, Flask, SQLAlchemy
 - **Frontend**: Tailwind CSS, Jinja2
 - **Database**: PostgreSQL
-- **Deployment**: Gunicorn + Nginx + Systemd
+- **Deployment**: Gunicorn + Nginx + Amazon AWS EC2
 - **Security**: JWT Auth, Role-based Access, SMTP Verification
 - **Others**: Python-Dotenv, Flask-Mail, Flask-Migrate
 
