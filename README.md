@@ -1,97 +1,230 @@
-# Digital Therapeutix
 
-A secure Flask-based authentication system for doctors, featuring email verification, license validation, password reset, and session management.
+# 🌐 Digital Therapeutix
 
-## Features
+**Digital Therapeutix** is an AI-driven medical platform designed to streamline the diagnosis and personalized phage therapy recommendation for bacterial infections. The system combines clinical expertise with data-driven models to aid healthcare professionals in recommending precise, bacteriophage-based treatments.
 
-- Doctor signup with license and institution details
-- Email verification for new accounts
-- Manual license approval by admin
-- Secure login/logout with session and JWT support
-- Password reset via email
-- CSRF protection on all forms
-- Environment-based configuration
+---
 
-## Project Structure
+## 🚀 Features
 
-```
-digital_therapeutix/
-│
-├── app/
-│   ├── __init__.py
-│   ├── extensions.py
-│   ├── models/
-│   │   └── user.py
-│   ├── routes/
-│   │   ├── auth.py
-│   │   └── forms.py
-│   └── templates/
-│       └── auth/
-│           ├── login.html
-│           ├── signup.html
-│           ├── forgot_password.html
-│           └── reset_password.html
-├── config.py
-├── .env
-├── .gitignore
-├── requirements.txt
-└── run.py
-```
+- 🔐 **Role-Based Authentication** (Admin & Doctor)
+- 📬 **Email Verification & Approval Workflow**
+- 🔍 **Intelligent Matching Engine**
+- 🧬 **FASTA File Analyzer**
+- 📊 **Detailed Match Reports**
+- 🛡️ **JWT-secured APIs**
+- 📁 Admin Interface to manage:
+  - Bacteria
+  - Phages
+  - Manufacturers
+  - Phage-Bacteria Interactions
+  - Bacteria-Bacteria Interactions
+  - Phage-Manufacturer Pricing
 
-## Getting Started
+---
 
-### 1. Clone the repository
+##  Project Structure
 
 ```sh
-git clone https://github.com/yourusername/digital_therapeutix.git
-cd digital_therapeutix
+└── digital_therapeutix/
+    ├── README.md
+    ├── app
+    │   ├── __init__.py
+    │   ├── extensions.py
+    │   ├── models
+    │   │   ├── __init__.py
+    │   │   ├── quintx.py
+    │   │   └── user.py
+    │   ├── routes
+    │   │   ├── __init__.py
+    │   │   ├── admin.py
+    │   │   ├── auth.py
+    │   │   ├── dashboard.py
+    │   │   └── forms.py
+    │   ├── seed
+    │   │   ├── bacteria_interactions.csv
+    │   │   ├── phage_interactions.csv
+    │   │   └── seed_data.py
+    │   ├── static
+    │   │   ├── css
+    │   │   │   └── style.css
+    │   │   └── images
+    │   │       ├── Forgot_passwordback.png
+    │   │       ├── clipboard.svg
+    │   │       ├── comingsoon.png
+    │   │       ├── doctorhome.png
+    │   │       ├── favicon.png
+    │   │       ├── help.png
+    │   │       ├── logo.png
+    │   │       ├── phage-bg.jpg
+    │   │       ├── phage-bg.webp
+    │   │       ├── profile.jpg
+    │   │       ├── success.png
+    │   │       └── upload.png
+    │   ├── templates
+    │   │   ├── admin
+    │   │   │   ├── dashboard.html
+    │   │   │   ├── sidebar.html
+    │   │   │   ├── user.html
+    │   │   │   ├── vendor_request.html
+    │   │   │   └── verify.html
+    │   │   ├── auth
+    │   │   │   ├── complete_application.html
+    │   │   │   ├── forgot_password.html
+    │   │   │   ├── login.html
+    │   │   │   ├── reset_password.html
+    │   │   │   └── signup.html
+    │   │   ├── base.html
+    │   │   ├── components
+    │   │   │   ├── analysis_report.html
+    │   │   │   ├── footer.html
+    │   │   │   ├── macros.html
+    │   │   │   └── navbar.html
+    │   │   └── dashboard
+    │   │       ├── cases.html
+    │   │       ├── help.html
+    │   │       ├── home.html
+    │   │       ├── phage_vendors.html
+    │   │       ├── result.html
+    │   │       └── sidebardoctor.html
+    │   └── utils
+    │       ├── __init__.py
+    │       ├── email.py
+    │       ├── helpers.py
+    │       ├── matcher
+    │       │   ├── matcher.py
+    │       │   └── matcher_utils.py
+    │       ├── quintx
+    │       │   └── quint_analysis.py
+    │       └── seed.py
+    ├── config.py
+    ├── data
+    │   └── bacteria_blst
+    │       ├── blst.ndb
+    │       ├── blst.nhr
+    │       ├── blst.nin
+    │       ├── blst.not
+    │       ├── blst.nsq
+    │       ├── blst.ntf
+    │       └── blst.nto
+    ├── requirements.txt
+    └── run.py
 ```
 
-### 2. Create and activate a virtual environment
+## ⚙️ Tech Stack
 
-```sh
-python -m venv venv
-venv\Scripts\activate  # On Windows
+- **Backend**: Python, Flask, SQLAlchemy
+- **Frontend**: Tailwind CSS, Jinja2
+- **Database**: PostgreSQL
+- **Deployment**: Gunicorn + Nginx + Systemd
+- **Security**: JWT Auth, Role-based Access, SMTP Verification
+- **Others**: Python-Dotenv, Flask-Mail, Flask-Migrate
+
+---
+
+## 🧪 Installation (Dev)
+
+1. **Clone Repo**  
+   ```bash
+   git clone https://github.com/aayush138/digital_therapeutix.git
+   cd digital_therapeutix
+   ```
+
+2. **Create Virtual Env**  
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. **Install Dependencies**  
+   ```bash
+   pip install -r requirements.txt
+   sudo apt install libpango-1.0-0 libcairo2 libpangoft2-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libxml2 libxslt1-dev
+   sudo apt install ncbi-blast+ -y
+   ```
+
+4. **Configure .env File**  
+   ```env
+   FLASK_ENV=development
+   SECRET_KEY=your_secret_key
+   DB_URI=your_database_uri
+   MAIL_USERNAME=your_email
+   MAIL_PASSWORD=your_password
+   ...
+   ```
+
+5. **Run Server**  
+   ```bash
+   flask run
+   ```
+
+---
+
+## 🧑‍💼 Admin Features
+
+- Approve/Reject Doctor Signups
+- Manage Master Data: Bacteria, Phages, Manufacturers
+- View Interaction Records
+- Track and Edit Match Results
+
+---
+
+## 🧑‍⚕️ Doctor Features
+
+- Signup & Email Verification
+- Upload FASTA Files
+- View Match Results
+- Case Tracking Dashboard
+
+---
+
+## 📄 Environment Variables
+
+Make sure the `.env` file is updated:
+
+```env
+SECRET_KEY=...
+SQLALCHEMY_DATABASE_URI=...
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
 ```
 
-### 3. Install dependencies
+---
 
-```sh
-pip install -r requirements.txt
+## 🛠️ Deployment
+
+```bash
+# Start Gunicorn
+gunicorn -c gunicorn_config.py run:app
+
+# View logs
+sudo journalctl -u digital_therapeutix -f
+
+# Restart service
+sudo systemctl restart digital_therapeutix
 ```
 
-### 4. Set up your `.env` file
+Make sure your `.service` file in `/etc/systemd/system/digital_therapeutix.service` is properly configured.
 
-Create a `.env` file in the project root with the following content:
+---
 
-```
-SECRET_KEY=your-very-secret-key
-DATABASE_URL=sqlite:///dev.db
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-email-password
-MAIL_DEFAULT_SENDER=your-email@gmail.com
-```
+## 🔒 Security Considerations
 
-> **Note:** Never commit your `.env` file to version control.
+- Do **not** commit your `.env` file
+- Use **strong random** secret keys
+- Apply rate limiting and input validation
 
-### 5. Run the application
+---
 
-```sh
-python run.py
-```
+## 📫 Contact
 
-Visit [http://127.0.0.1:5000/auth/login](http://127.0.0.1:5000/auth/login) in your browser.
+**Digital Therapeutix Team**  
+📧 support@digitaltherapeutix.com  
+🌐 [https://digitaltherapeutix.com](https://digitaltherapeutix.com)
 
-## Database Initialization
-
-The database tables are created automatically when you run the app for the first time.
-
-## Security Notes
-
-- All forms are CSRF-protected.
-- Passwords are securely hashed.
-- Email and license verification are required for login.
-- Sensitive configuration is loaded from environment variables.
 
 ## License
 

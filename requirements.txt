@@ -10,7 +10,6 @@ WTForms
 PyJWT
 email_validator
 python-dotenv==1.1.1
-reportlab
 weasyprint
 
 # Backend dependencies
@@ -30,3 +29,4 @@ six==1.17.0
 SQLAlchemy==2.0.41
 typing_extensions==4.14.1
 tzdata==2025.2
+gunicorn
