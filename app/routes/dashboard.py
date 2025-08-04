@@ -132,59 +132,41 @@ def generate_case_id():
 
 @dashboard_bp.route('/analyze', methods=['POST'])
 def analyze():
-    print("Received request at /analyze")
-
     fasta_file = request.files.get('fasta')
     notes = request.form.get('notes', '')
     model = request.form.get('model', '').strip().lower()
     case_id = request.form.get('case_id')  # coming silently from frontend
 
-    print(f"Model selected: {model}")
-    print(f"Notes: {notes}")
-    print(f"Case ID from form: {case_id}")
-    print(f"Received file: {fasta_file.filename if fasta_file else 'None'}")
-
     try:
         threshold = float(request.form.get('threshold', 96.2))
-        print(f"Threshold: {threshold}")
     except ValueError:
-        print("Invalid threshold value received")
         return jsonify({'status': 'error', 'message': 'Invalid threshold value'}), 400
 
     if not fasta_file:
-        print("No file uploaded")
         return jsonify({'status': 'error', 'message': 'No file uploaded'}), 400
-
+    
     if not case_id:
         last = CaseReport.query.order_by(CaseReport.id.desc()).first()
         new_number = last.id + 1 if last else 10001
         case_id = f"{new_number}"
-        print(f"Generated new case ID: {case_id}")
 
     if model == "quint":
         try:
-            print("Running QUINT analysis...")
             result = run_quint_analysis(fasta_file, threshold, notes, case_id)
-            print(f"Analysis result: {result}")
 
             if isinstance(result, dict) and result.get("analysis_id"):
                 analysis_id = result["analysis_id"]
-                print(f"Analysis ID: {analysis_id}")
                 return jsonify({
                     'status': 'success',
                     'redirect_url': f'/dashboard/analysis/result/{analysis_id}'
                 })
 
-            print("Analysis did not return expected result")
             return jsonify({'status': 'error'}), 500
 
-        except Exception as e:
-            print(f"Exception during analysis: {e}")
+        except Exception:
             return jsonify({'status': 'error'}), 500
 
-    print("Invalid model specified or not supported")
     return jsonify({'status': 'error'}), 400
-
 
 
 
